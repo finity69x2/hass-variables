@@ -118,7 +118,7 @@ async def async_setup(hass, config):
                 yield from asyncio.wait(tasks, loop=hass.loop)
 
         else:
-            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
+            _LOGGER.warning(f"Failed to set unknown variable: {entity_id}")
 
     hass.services.async_register(
         DOMAIN,
