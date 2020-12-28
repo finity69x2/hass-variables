@@ -1,0 +1,5 @@
+{
+    "name": "Hass-variables",
+    "homeassistant": "0.117.0",
+    "iot_class": "local push"
+  }
