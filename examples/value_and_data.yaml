@@ -18,4 +18,4 @@
           date: "{{ state_attr('sensor.cp_packages_coming_today', 'date') }}"
           subject: "{{ state_attr('sensor.cp_packages_coming_today', 'subject') }}"
       value: >
-          {{ states('sensor.cp_packages_coming_today')}}
+        {{ states('sensor.cp_packages_coming_today')}}

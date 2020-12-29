@@ -15,4 +15,4 @@ automation:
         data:
           variable: test_counter
           value: >
-            '{{ (variable.state | int) + 1 }}'
+            {{ (variable.state | int) + 1 }}
