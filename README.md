@@ -124,7 +124,8 @@ automation:
       - service: variable.set_variable
         data:
           variable: test_timer
-          value: '{{ [((variable.state | int) - 1), 0] | max }}'
+          value: >
+            '{{ [((variable.state | int) - 1), 0] | max }}'
 
   - alias: test_timer_trigger
     trigger:

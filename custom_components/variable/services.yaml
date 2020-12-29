@@ -14,8 +14,3 @@ set_variable:
       description: dictionary (optional) Attributes to set or update
     replace_attributes:
       description: boolean ( optional ) Replace or merge current attributes (default false = merge)
-
- 
-
-
-

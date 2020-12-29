@@ -22,7 +22,8 @@ script:
       - service: variable.set_variable
         data:
           variable: keypad
-          value: '{{ variable.state }}{{ variable.attributes.last }}'
+          value: >
+            '{{ variable.state }}{{ variable.attributes.last }}'
       - service: variable.set_variable
         data:
           variable: keypad_timer
@@ -72,7 +73,8 @@ automation:
       - service: variable.set_variable
         data:
           variable: keypad_timer
-          value: '{{ [((variable.state | int) - 1), 0] | max }}'
+          value: >
+            '{{ [((variable.state | int) - 1), 0] | max }}'
 
   - alias: keypad_timeout
     trigger:
