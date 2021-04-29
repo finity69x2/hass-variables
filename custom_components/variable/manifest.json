@@ -9,5 +9,6 @@
         "@rogro82",
         "@wibias"
     ],
-    "version": "2.0.0"
+    "iot_class": "calculated",
+    "version": "2.1.0"
 }
