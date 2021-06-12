@@ -13,7 +13,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "variable"
+DOMAIN = "variable_history"
 ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
 CONF_ATTRIBUTES = "attributes"
@@ -95,7 +95,8 @@ async def async_setup(hass, config):
         force_update = variable_config.get(CONF_FORCE_UPDATE, False)
 
         entities.append(
-            Variable(variable_id, name, value, attributes, restore, force_update)
+            Variable(variable_id, name, value,
+                     attributes, restore, force_update)
         )
 
     @asyncio.coroutine
@@ -188,8 +189,6 @@ class Variable(RestoreEntity):
     def force_update(self) -> bool:
         """Force update"""
         return self._force_update
-
-
 
     @asyncio.coroutine
     def async_set_variable(
