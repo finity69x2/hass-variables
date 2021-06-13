@@ -13,7 +13,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "variable_history"
+DOMAIN = "variable"
 ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
 CONF_ATTRIBUTES = "attributes"

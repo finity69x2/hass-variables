@@ -1,5 +1,5 @@
 {
-    "domain": "variable_history",
+    "domain": "variable",
     "name": "Variables+History",
     "documentation": "https://github.com/Wibias/hass-variables",
     "issue_tracker": "https://github.com/Wibias/hass-variables/issues",
