@@ -12,7 +12,7 @@ jobs:
       - run: pip install bandit black codespell flake8 flake8-2020 flake8-bugbear
                          flake8-comprehensions isort mypy pytest pyupgrade safety
       - run: bandit --recursive --skip B105,B108,B303,B311 .
-      - run: black --check . || true
+      - run: black --check --diff . || true
       - run: codespell --ignore-words-list="hass"
       - run: flake8 . --count --ignore=B001,E241,E265,E302,E722,E731,F403,F405,F841,W504
                       --max-complexity=21 --max-line-length=184 --show-source --statistics
