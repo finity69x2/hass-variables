@@ -94,8 +94,7 @@ async def async_setup(hass, config):
         force_update = variable_config.get(CONF_FORCE_UPDATE, False)
 
         entities.append(
-            Variable(variable_id, name, value,
-                     attributes, restore, force_update)
+            Variable(variable_id, name, value, attributes, restore, force_update)
         )
 
     @asyncio.coroutine
@@ -118,9 +117,7 @@ async def async_setup(hass, config):
                 yield from asyncio.wait(tasks, loop=hass.loop)
 
         else:
-            _LOGGER.warning(
-                f"Failed to set unknown variable: {entity_id}"
-            )
+            _LOGGER.warning(f"Failed to set unknown variable: {entity_id}")
 
     hass.services.async_register(
         DOMAIN,
