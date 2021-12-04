@@ -1,7 +1,6 @@
 """variable implementation for Home Assistant."""
 import asyncio
-import logging
-import json
+import loggings
 
 import voluptuous as vol
 
