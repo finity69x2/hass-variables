@@ -1,5 +1,4 @@
 """variable implementation for Home Assistant."""
-import asyncio
 import logging
 
 import voluptuous as vol
@@ -104,9 +103,9 @@ async def async_setup(hass, config):
 
         if entity:
             await entity.async_set_variable(
-                    call.data.get(ATTR_VALUE),
-                    call.data.get(ATTR_ATTRIBUTES),
-                    call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
+                call.data.get(ATTR_VALUE),
+                call.data.get(ATTR_ATTRIBUTES),
+                call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
             )
         else:
             _LOGGER.warning(f"Failed to set unknown variable: {entity_id}")
