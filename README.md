@@ -116,7 +116,7 @@ automation:
         data:
           variable: test_timer
           value: >
-            {{ [((states.variable.test_timer.state | int) - 1), 0] | max }}
+            {{ [((states('variable.test_timer') | int) - 1), 0] | max }}
 
   - alias: test_timer_trigger
     trigger:
