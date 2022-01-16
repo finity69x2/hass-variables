@@ -114,7 +114,7 @@ script:
           variable: saved_messages
           value: '{{ count if repeat_message else count + 1 }}'
           attributes: >
-            {% set message = message|replace('\n',' ') %} {# newlines mess with dictonary format #}
+            {% set message = message|replace('\n',' ') %} {# newlines mess with dictionary format #}
             {% set msg_num = namespace(value=0) %}
             {% set found_msg = namespace(value=0) %}
             {% set dict_string = namespace(value='') %}
