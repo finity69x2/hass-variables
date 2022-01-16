@@ -139,7 +139,7 @@ Saved messages will survive restarts.
 
 BONUS - OPTIONAL TTS MESSAGE HISTORY
 
-You can find the full documentation on how to do this and andjust this to your needs in here. [here](https://github.com/Wibias/hass-variables/tree/master/examples/save-tts-message/tts.md).
+You can find the full documentation on how to do this and andjust this to your needs in [here](https://github.com/Wibias/hass-variables/tree/master/examples/save-tts-message/tts.md).
 
 ---
 
