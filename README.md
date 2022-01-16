@@ -129,4 +129,18 @@ automation:
           entity_id: automation.test_timer_countdown
 ```
 
+### Play and Save TTS Messages + Message History - Made by https://github.com/jazzyisj
+
+This is more or less an answering machine (remember those?) for your TTS messages. When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the script Play or Save TTS Messsage script.play_or_save_message instead of calling your tts service (or Alexa notify) directly. The script will decide whether to play the message immediately, or save it based on the conditions you specify. If a saved tts message is repeated another message is not saved, only the timestamp is updated to the most recent instance.
+
+Messages are played back using the Play Saved TTS Messages script script.play_saved_tts_messages. Set an appropriate trigger (for example when you arrive home) in the automation Play Saved Messages automation.play_saved_messages automation to call this script automatically.
+
+Saved messages will survive restarts.
+
+BONUS - OPTIONAL TTS MESSAGE HISTORY
+
+You can find the full documentation on how to do this and andjust this to your needs in here. [here](https://github.com/Wibias/hass-variables/tree/master/examples/save-tts-message/tts.md).
+
+---
+
 More examples can be found in the examples folder.
