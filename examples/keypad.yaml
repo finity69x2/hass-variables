@@ -74,7 +74,7 @@ automation:
         data:
           variable: keypad_timer
           value: >
-            {{ [((variable.state | int) - 1), 0] | max }}
+            {{ [((variable.state | int(default=0)) - 1), 0] | max }}
 
   - alias: keypad_timeout
     trigger:
