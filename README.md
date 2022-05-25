@@ -2,7 +2,7 @@
 
 A Home Assistant component to declare and set/update variables (state).
 
-Since rogro82 seems to have abandoned his repository and his custom_component is really useful I just forked it and updated it so it's still works with ^2021.9.0!
+Since rogro82 seems to have abandoned his repository and his custom_component is really useful I just forked it and updated it so it's still works with ^2022.4.0!
 
 ## Install
 
