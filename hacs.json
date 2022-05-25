@@ -1,5 +1,4 @@
 {
     "name": "Variables+History",
-    "homeassistant": "2022.4.0",
-    "iot_class": "local push"
+    "homeassistant": "2022.4.0"
   }
