@@ -1,0 +1,20 @@
+#Limited configuration instead of default_config
+#https://github.com/home-assistant/core/tree/dev/homeassistant/components/default_config
+automation:
+frontend:
+history:
+logbook:
+
+homeassistant:
+  name: Home
+
+variable:
+  test_counter:
+    value: 0
+    attributes:
+      icon: mdi:alarm
+
+logger:
+  default: info
+  logs:
+    custom_components.variable: debug
