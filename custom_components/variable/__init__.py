@@ -108,7 +108,7 @@ async def async_setup(hass, config):
                 call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
             )
         else:
-            _LOGGER.warning(f"Failed to set unknown variable: {entity_id}")
+            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
 
     hass.services.async_register(
         DOMAIN,
@@ -174,7 +174,7 @@ class Variable(RestoreEntity):
 
     @property
     def force_update(self) -> bool:
-        """Force update"""
+        """Force an update."""
         return self._force_update
 
     async def async_set_variable(
@@ -184,7 +184,6 @@ class Variable(RestoreEntity):
         replace_attributes,
     ):
         """Update variable."""
-        current_state = self.hass.states.get(self.entity_id)
         updated_attributes = None
         updated_value = None
 
