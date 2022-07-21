@@ -20,13 +20,24 @@ CONF_RESTORE = "restore"
 CONF_FORCE_UPDATE = "force_update"
 CONF_DOMAIN = "domain"
 
+ATTR_ENTITY = "entity"
 ATTR_VARIABLE = "variable"
 ATTR_VALUE = "value"
 ATTR_ATTRIBUTES = "attributes"
 ATTR_REPLACE_ATTRIBUTES = "replace_attributes"
 ATTR_DOMAIN = "domain"
 
+SERVICE_SET_ENTITY = "set_entity"
 SERVICE_SET_VARIABLE = "set_variable"
+
+SERVICE_SET_ENTITY_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTITY): cv.string,
+        vol.Optional(ATTR_VALUE): cv.match_all,
+        vol.Optional(ATTR_ATTRIBUTES): dict,
+        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+    }
+)
 SERVICE_SET_VARIABLE_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_VARIABLE): cv.string,
@@ -100,11 +111,37 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         else:
             _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
 
+    async def async_set_entity_service(call):
+        """Handle calls to the set_entity service."""
+
+        entity_id: str = call.data.get(ATTR_ENTITY)
+        state_value = call.data.get(ATTR_VALUE)
+        attributes = call.data.get(ATTR_ATTRIBUTES, {})
+        replace_attributes = call.data.get(ATTR_REPLACE_ATTRIBUTES, False)
+
+        if replace_attributes:
+            updated_attributes = attributes
+        else:
+            cur_state = hass.states.get(entity_id)
+            if cur_state is None or cur_state.attributes is None:
+                updated_attributes = attributes
+            else:
+                updated_attributes = dict(cur_state.attributes)
+                updated_attributes.update(attributes)
+
+        hass.states.async_set(entity_id, state_value, updated_attributes)
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_SET_VARIABLE,
         async_set_variable_service,
         schema=SERVICE_SET_VARIABLE_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_ENTITY,
+        async_set_entity_service,
+        schema=SERVICE_SET_ENTITY_SCHEMA,
     )
 
     await component.async_add_entities(entities)
