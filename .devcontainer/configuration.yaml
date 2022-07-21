@@ -9,6 +9,11 @@ homeassistant:
   name: Home
 
 variable:
+  test_sensor:
+    value: 0
+    restore: true
+    domain: sensor
+
   test_counter:
     value: 0
     attributes:
