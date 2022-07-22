@@ -42,9 +42,20 @@ variable:
     restore: true
   current_power_usage:
     force_update: true
+
+  daily_download:
+    value: 0
+    restore: true
+    domain: sensor
+    attributes:
+      state_class: measurement
+      unit_of_measurement: GB
+      icon: mdi:download
 ```
 
 A variable 'should' have a __value__ and can optionally have a __name__ and __attributes__, which can be used to specify additional values but can also be used to set internal attributes like icon, friendly_name etc.
+
+A variable can accept an optional `domain` which results in the entity name to start with that domain instead of `variable`.
 
 In case you want your variable to restore its value and attributes after restarting you can set __restore__ to true.
 
@@ -52,9 +63,11 @@ In case you want your variable to update (and add a history entry) even if the v
 
 ## Set variables from automations
 
-To update a variables value and/or its attributes you can use the service call `variable.set_variable`
+The variable componet exposes 2 services:
+* `variable.set_variable` can be used to update a variables value and/or its attributes.
+* `variable.set_entity` can be used to update an entity value and/or its attributes.
 
-The following parameters can be used with this service:
+The following parameters can be used with `variable.set_variable`:
 
 - __variable: string (required)__
 The name of the variable to update
@@ -65,7 +78,19 @@ Attributes to set or update
 - __replace_attributes: boolean ( optional )__
 Replace or merge current attributes (default false = merge)
 
-### Example service calls
+
+The following parameters can be used with `variable.set_entity`:
+
+- __entity: string (required)__
+The id of the entity to update
+- __value: any (optional)__
+New value to set
+- __attributes: dictionary (optional)__
+Attributes to set or update
+- __replace_attributes: boolean ( optional )__
+Replace or merge current attributes (default false = merge)
+
+#### Example service calls
 
 ```yaml
 action:
@@ -83,6 +108,12 @@ action:
           history_1: "{{states('variable.last_motion')}}"
           history_2: "{{state_attr('variable.last_motion','history_1')}}"
           history_3: "{{state_attr('variable.last_motion','history_2')}}"
+
+action:
+  - service: variable.set_entity
+    data:
+      variable: sensor.test_counter
+      value: 30
 ```
 
 ### Example timer automation
