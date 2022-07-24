@@ -63,7 +63,7 @@ In case you want your variable to update (and add a history entry) even if the v
 
 ## Set variables from automations
 
-The variable componet exposes 2 services:
+The variable component exposes 2 services:
 * `variable.set_variable` can be used to update a variables value and/or its attributes.
 * `variable.set_entity` can be used to update an entity value and/or its attributes.
 
