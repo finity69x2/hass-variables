@@ -112,7 +112,7 @@ action:
 action:
   - service: variable.set_entity
     data:
-      variable: sensor.test_counter
+      entity: sensor.test_counter
       value: 30
 ```
 
