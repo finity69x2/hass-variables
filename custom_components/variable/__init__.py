@@ -210,7 +210,7 @@ class Variable(RestoreEntity):
     @property
     def unique_id(self):
         """Make UID"""
-        return "variable_" + self._name
+        return None if self._name is None else "variable_" + self._name
 
     async def async_set_variable(
         self,
