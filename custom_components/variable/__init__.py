@@ -93,7 +93,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
 
         entities.append(
             Variable(
-                variable_id, name, value, attributes, restore, force_update,domain
+                variable_id, name, value, attributes, restore, force_update, domain
             )
         )
 
