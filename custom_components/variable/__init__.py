@@ -19,7 +19,6 @@ CONF_VALUE = "value"
 CONF_RESTORE = "restore"
 CONF_FORCE_UPDATE = "force_update"
 CONF_DOMAIN = "domain"
-CONF_UNIQUE_ID = "unique_id"
 
 ATTR_ENTITY = "entity"
 ATTR_VARIABLE = "variable"
@@ -58,7 +57,6 @@ CONFIG_SCHEMA = vol.Schema(
                         vol.Optional(CONF_VALUE): cv.match_all,
                         vol.Optional(CONF_ATTRIBUTES): dict,
                         vol.Optional(CONF_RESTORE): cv.boolean,
-                        vol.Optional(CONF_UNIQUE_ID): cv.string,
                         vol.Optional(CONF_FORCE_UPDATE): cv.boolean,
                         vol.Optional(ATTR_DOMAIN): cv.string,
                     },
@@ -92,11 +90,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         restore = variable_config.get(CONF_RESTORE, False)
         force_update = variable_config.get(CONF_FORCE_UPDATE, False)
         domain = variable_config.get(CONF_DOMAIN, DOMAIN)
-        unique_id = variable_config.get(CONF_UNIQUE_ID)
 
         entities.append(
             Variable(
-                variable_id, name, value, attributes, restore, force_update, unique_id, domain
+                variable_id, name, value, attributes, restore, force_update,domain
             )
         )
 
@@ -155,7 +152,7 @@ class Variable(RestoreEntity):
     """Representation of a variable."""
 
     def __init__(
-        self, variable_id, name, value, attributes, unique_id, restore, force_update, domain
+        self, variable_id, name, value, attributes, restore, force_update, domain
     ):
         """Initialize a variable."""
 
@@ -165,7 +162,6 @@ class Variable(RestoreEntity):
         self._attributes = attributes
         self._restore = restore
         self._force_update = force_update
-        self._attr_unique_id = unique_id
 
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
