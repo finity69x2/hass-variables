@@ -1,4 +1,4 @@
-"""variable implementation for Home Assistant."""
+"""Variable implementation for Home Assistant."""
 import logging
 
 from homeassistant.const import ATTR_ICON, CONF_NAME
@@ -152,7 +152,14 @@ class Variable(RestoreEntity):
     """Representation of a variable."""
 
     def __init__(
-        self, variable_id, name, value, attributes, restore, force_update, domain
+        self,
+        variable_id,
+        name,
+        value,
+        attributes,
+        restore,
+        force_update,
+        domain
     ):
         """Initialize a variable."""
 
@@ -199,18 +206,13 @@ class Variable(RestoreEntity):
 
     @property
     def state_attributes(self):
-        """Return the state attributes."""
+        """Return the attributes of the variable."""
         return self._attributes
 
     @property
     def force_update(self) -> bool:
-        """Force an update."""
+        """Force update of the entity."""
         return self._force_update
-
-    @property
-    def unique_id(self):
-        """Make UID"""
-        return None if self._name is None else "variable_" + self._name
 
     async def async_set_variable(
         self,
