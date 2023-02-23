@@ -242,3 +242,4 @@ class Variable(RestoreEntity):
             self._value = updated_value
 
         await self.async_update_ha_state()
+        
