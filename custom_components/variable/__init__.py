@@ -1,13 +1,13 @@
-"""Variable implementation for Home Assistant."""
 import logging
+from typing import Any, Dict, Optional, Union
 
+import voluptuous as vol
 from homeassistant.const import ATTR_ICON, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity_component import EntityComponent
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
-import voluptuous as vol
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def get_entity_id_format(domain: str) -> str:
     return domain + ".{}"
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType):
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up variables."""
     component = EntityComponent(_LOGGER, DOMAIN, hass)
 
@@ -97,7 +97,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             )
         )
 
-    async def async_set_variable_service(call):
+    async def async_set_variable_service(call: ServiceCall) -> None:
         """Handle calls to the set_variable service."""
         entity_id = ENTITY_ID_FORMAT.format(call.data.get(ATTR_VARIABLE))
         entity = component.get_entity(entity_id)
@@ -111,7 +111,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         else:
             _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
 
-    async def async_set_entity_service(call):
+    async def async_set_entity_service(call: ServiceCall) -> None:
         """Handle calls to the set_entity service."""
 
         entity_id: str = call.data.get(ATTR_ENTITY)
@@ -153,13 +153,13 @@ class Variable(RestoreEntity):
 
     def __init__(
         self,
-        variable_id,
-        name,
-        value,
-        attributes,
-        restore,
-        force_update,
-        domain
+        variable_id: str,
+        name: Optional[str],
+        value: Optional[Any],
+        attributes: Optional[Dict[str, Any]],
+        restore: bool,
+        force_update: bool,
+        domain: str,
     ):
         """Initialize a variable."""
 
@@ -170,7 +170,7 @@ class Variable(RestoreEntity):
         self._restore = restore
         self._force_update = force_update
 
-    async def async_added_to_hass(self):
+    async def async_added_to_hass(self) -> None:
         """Run when entity about to be added."""
         await super().async_added_to_hass()
         if self._restore is True:
@@ -183,29 +183,29 @@ class Variable(RestoreEntity):
                 self._attributes = state.attributes
 
     @property
-    def should_poll(self):
+    def should_poll(self) -> bool:
         """If entity should be polled."""
         return False
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         """Return the name of the variable."""
         return self._name
 
     @property
-    def icon(self):
+    def icon(self) -> Optional[str]:
         """Return the icon to be used for this entity."""
         if self._attributes is not None:
             return self._attributes.get(ATTR_ICON)
         return None
 
     @property
-    def state(self):
+    def state(self) -> Optional[Any]:
         """Return the state of the component."""
         return self._value
 
     @property
-    def state_attributes(self):
+    def state_attributes(self) -> Optional[Dict[str, Any]]:
         """Return the attributes of the variable."""
         return self._attributes
 
@@ -216,10 +216,10 @@ class Variable(RestoreEntity):
 
     async def async_set_variable(
         self,
-        value,
-        attributes,
-        replace_attributes,
-    ):
+        value: Optional[Any],
+        attributes: Optional[Dict[str, Any]],
+        replace_attributes: bool,
+    ) -> None:
         """Update variable."""
         updated_attributes = None
         updated_value = None
