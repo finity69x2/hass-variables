@@ -1,0 +1,20 @@
+{
+    "title": "Variables+History",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Variables+History",
+                "data": {
+                    "name": "[%key:common::config_flow::data::name%]",
+                    "variable_id": "Variable ID",
+                    "icon": "Icon",
+                    "value": "Initial Value",
+                    "attributes": "Initial Attributes",
+                    "restore": "Restore on Restart",
+                    "force_update": "Force Update"
+                },
+                "description": "Create a new Variable"
+            }
+        }
+    }
+  }
