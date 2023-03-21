@@ -1,7 +1,6 @@
 """Variable implementation for Home Assistant."""
 import logging
 
-from homeassistant import config_entries, core
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -11,13 +10,12 @@ import voluptuous as vol
 
 from .const import (
     ATTR_ATTRIBUTES,
+    ATTR_ENTITY,
     ATTR_REPLACE_ATTRIBUTES,
     ATTR_VALUE,
     ATTR_VARIABLE,
     DOMAIN,
 )
-
-# from .const import CONF_ATTRIBUTES, CONF_VALUE, CONF_VARIABLE_ID, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,10 +26,20 @@ PLATFORMS: list[str] = [Platform.SENSOR]
 ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
+SERVICE_SET_ENTITY_LEGACY = "set_entity"
 
 SERVICE_SET_VARIABLE_LEGACY_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_VARIABLE): cv.string,
+        vol.Optional(ATTR_VALUE): cv.match_all,
+        vol.Optional(ATTR_ATTRIBUTES): dict,
+        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+    }
+)
+
+SERVICE_SET_ENTITY_LEGACY_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_ENTITY): cv.string,
         vol.Optional(ATTR_VALUE): cv.match_all,
         vol.Optional(ATTR_ATTRIBUTES): dict,
         vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
@@ -47,7 +55,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
     async def async_set_variable_legacy_service(call):
         """Handle calls to the set_variable service."""
 
-        _LOGGER.debug("Starting async_set_variable_service")
+        _LOGGER.debug("Starting async_set_variable_legacy_service")
         _LOGGER.debug("call: " + str(call))
 
         entity_id = ENTITY_ID_FORMAT.format("variable_" + call.data.get(ATTR_VARIABLE))
@@ -68,6 +76,32 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         SERVICE_SET_VARIABLE_LEGACY,
         async_set_variable_legacy_service,
         schema=SERVICE_SET_VARIABLE_LEGACY_SCHEMA,
+    )
+
+    async def async_set_entity_legacy_service(call):
+        """Handle calls to the set_entity service."""
+
+        _LOGGER.debug("Starting async_set_entity_legacy_service")
+        _LOGGER.debug("call: " + str(call))
+
+        entity_id: str = call.data.get(ATTR_ENTITY)
+        entity_registry = er.async_get(hass)
+        entity = entity_registry.get_entity(entity_id)
+
+        if entity:
+            await entity.async_set_variable(
+                call.data.get(ATTR_VALUE),
+                call.data.get(ATTR_ATTRIBUTES),
+                call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
+            )
+        else:
+            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_ENTITY_LEGACY,
+        async_set_entity_legacy_service,
+        schema=SERVICE_SET_ENTITY_LEGACY_SCHEMA,
     )
 
     return True
@@ -96,7 +130,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from a config entry."""
 
-    # _LOGGER.debug("[init async_setup_entry] entry: " + str(entry.data))
+    _LOGGER.debug("[init async_setup_entry] entry: " + str(entry.data))
     hass.data.setdefault(DOMAIN, {})
     hass_data = dict(entry.data)
     hass.data[DOMAIN][entry.entry_id] = hass_data
@@ -106,9 +140,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_unload_entry(
-    hass: core.HomeAssistant, entry: config_entries.ConfigEntry
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     # This is called when an entry/configured device is to be removed. The class
     # needs to unload itself, and remove callbacks. See the classes for further
