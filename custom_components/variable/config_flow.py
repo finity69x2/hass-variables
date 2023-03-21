@@ -39,8 +39,10 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     """
 
     _LOGGER.debug("[config_flow validate_input] data: " + str(data))
-
-    return {"title": data[CONF_NAME]}
+    if data.get(CONF_NAME):
+        return {"title": data.get(CONF_NAME)}
+    else:
+        return {"title": data.get(CONF_VARIABLE_ID)}
 
 
 class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -73,12 +75,14 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         DATA_SCHEMA = vol.Schema(
             {
                 vol.Required(CONF_VARIABLE_ID): cv.string,
-                vol.Required(CONF_NAME): cv.string,
+                vol.Optional(CONF_NAME): cv.string,
                 vol.Optional(CONF_ICON, default=DEFAULT_ICON): selector.IconSelector(
                     selector.IconSelectorConfig()
                 ),
                 vol.Optional(CONF_VALUE): cv.string,
-                vol.Optional(CONF_ATTRIBUTES): cv.string,
+                vol.Optional(CONF_ATTRIBUTES): selector.ObjectSelector(
+                    selector.ObjectSelectorConfig()
+                ),
                 vol.Optional(
                     CONF_RESTORE, default=DEFAULT_RESTORE
                 ): selector.BooleanSelector(selector.BooleanSelectorConfig()),

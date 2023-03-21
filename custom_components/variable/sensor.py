@@ -1,21 +1,20 @@
-import asyncio
-from datetime import timedelta
+# import asyncio
+# from datetime import timedelta
 import logging
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.components.sensor import PLATFORM_SCHEMA, RestoreSensor
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import (
+from homeassistant.const import (  # SERVICE_RELOAD,
     CONF_ICON,
     CONF_NAME,
     EVENT_HOMEASSISTANT_START,
-    SERVICE_RELOAD,
+    Platform,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.entity_component import EntityComponent
+from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers.entity import generate_entity_id
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util import slugify
 import voluptuous as vol
@@ -24,7 +23,6 @@ from .const import (
     ATTR_ATTRIBUTES,
     ATTR_REPLACE_ATTRIBUTES,
     ATTR_VALUE,
-    ATTR_VARIABLE,
     CONF_ATTRIBUTES,
     CONF_FORCE_UPDATE,
     CONF_RESTORE,
@@ -45,23 +43,8 @@ except Exception as e:
     )
     use_issue_reg = False
 
-THROTTLE_INTERVAL = timedelta(seconds=600)
-SCAN_INTERVAL = timedelta(seconds=30)
-
-ENTITY_ID_FORMAT = DOMAIN + ".{}"
-
-SERVICE_SET_VARIABLE = "set_variable"
-
-
-SERVICE_SET_VARIABLE_SCHEMA = vol.Schema(
-    {
-        vol.Required(ATTR_VARIABLE): cv.string,
-        vol.Optional(ATTR_VALUE): cv.match_all,
-        vol.Optional(ATTR_ATTRIBUTES): dict,
-        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
-    }
-)
-
+ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
+# ENTITY_ID_FORMAT = DOMAIN + ".{}"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -72,6 +55,16 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_ATTRIBUTES): dict,
         vol.Optional(CONF_RESTORE): cv.boolean,
         vol.Optional(CONF_FORCE_UPDATE): cv.boolean,
+    }
+)
+
+SERVICE_SET_VARIABLE = "update"
+
+SERVICE_SET_VARIABLE_SCHEMA = vol.Schema(
+    {
+        vol.Optional(ATTR_VALUE): cv.match_all,
+        vol.Optional(ATTR_ATTRIBUTES): dict,
+        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
     }
 )
 
@@ -132,61 +125,6 @@ async def async_setup_platform(
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, schedule_import)
 
 
-# async def async_setup(hass: HomeAssistant, config: ConfigType):
-#    """Set up the Variable integration component."""
-#    _LOGGER.debug("Starting async_setup")
-#    hass.data.setdefault(DOMAIN, {})
-#    hass.data[DOMAIN] = {}
-#    component = EntityComponent(_LOGGER, DOMAIN, hass)
-#    # _LOGGER.debug("[async_setup] config: " + str(config))
-#
-#    async def _handle_reload(service):
-#        """Handle reload service call."""
-#        _LOGGER.info("Service %s.reload called: reloading integration", DOMAIN)
-#
-#        current_entries = hass.config_entries.async_entries(DOMAIN)
-#
-#        reload_tasks = [
-#            hass.config_entries.async_reload(entry.entry_id)
-#            for entry in current_entries
-#        ]
-#
-#        await asyncio.gather(*reload_tasks)
-#
-#    hass.helpers.service.async_register_admin_service(
-#        DOMAIN,
-#        SERVICE_RELOAD,
-#        _handle_reload,
-#    )
-#
-#    async def async_set_variable_service(call):
-#        """Handle calls to the set_variable service."""
-#
-#        _LOGGER.debug("Starting async_set_variable_service")
-#        _LOGGER.debug("call: " + str(call))
-#
-#        entity_id = ENTITY_ID_FORMAT.format(call.data.get(CONF_VARIABLE_ID))
-#        entity = component.get_entity(entity_id)
-#
-#        if entity:
-#            await entity.async_set_variable(
-#                call.data.get(ATTR_VALUE),
-#                call.data.get(ATTR_ATTRIBUTES),
-#                call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
-#            )
-#        else:
-#            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
-#
-#    hass.services.async_register(
-#        DOMAIN,
-#        SERVICE_SET_VARIABLE,
-#        async_set_variable_service,
-#        schema=SERVICE_SET_VARIABLE_SCHEMA,
-#    )
-#
-#    return True
-
-
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -197,9 +135,20 @@ async def async_setup_entry(
 
     _LOGGER.debug("Starting async_setup_entry")
 
+    platform = entity_platform.async_get_current_platform()
+
+    platform.async_register_entity_service(
+        SERVICE_SET_VARIABLE,
+        {
+            vol.Optional(ATTR_VALUE): cv.string,
+            vol.Optional(ATTR_ATTRIBUTES): dict,
+            vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+        },
+        "async_set_variable",
+    )
+
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
     unique_id = config_entry.entry_id
-    name = config.get(CONF_NAME)
     _LOGGER.debug(
         "[async_setup_entry] config_entry type: " + str(config_entry.__class__.__mro__)
     )
@@ -207,14 +156,12 @@ async def async_setup_entry(
     _LOGGER.debug("[async_setup_entry] config: " + str(config))
     _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))
 
-    async_add_entities(
-        [Variable(hass, config, config_entry, name, unique_id)], update_before_add=True
-    )
+    async_add_entities([Variable(hass, config, unique_id)])
 
     return True
 
 
-class Variable(SensorEntity, RestoreEntity):
+class Variable(RestoreSensor):
     """Representation of a variable."""
 
     def __init__(
@@ -225,28 +172,28 @@ class Variable(SensorEntity, RestoreEntity):
     ):
         """Initialize a variable."""
         _LOGGER.debug("[init] config: " + str(config))
-        self._variable_id = config.get(CONF_VARIABLE_ID)
-        # self.entity_id = ENTITY_ID_FORMAT.format(self._variable_id)
-        # self._config_entry = config_entry
         self._hass = hass
+        self._attr_has_entity_name = True
+        self._variable_id = slugify(config.get(CONF_VARIABLE_ID).lower())
         self._attr_unique_id = unique_id
-        # self.config_entry_id = unique_id
-        self._attr_name = config.get(CONF_NAME)
+        if config.get(CONF_NAME):
+            self._attr_name = config.get(CONF_NAME)
+        else:
+            self._attr_name = config.get(CONF_VARIABLE_ID)
         self._attr_icon = config.get(CONF_ICON)
-        self._attr_state = config.get(CONF_VALUE)
-        # self._attr_native_value = None  # Represents the state in SensorEntity
-
+        self._attr_native_value = config.get(CONF_VALUE)
         self._attr_extra_state_attributes = config.get(CONF_ATTRIBUTES)
         self._restore = config.get(CONF_RESTORE)
         self._force_update = config.get(CONF_FORCE_UPDATE)
-        _LOGGER.debug("[init] self type: " + str(self.__class__.__mro__))
-        _LOGGER.debug("[init] self: " + str(self))
+        self.entity_id = generate_entity_id(
+            ENTITY_ID_FORMAT, "variable_" + self._variable_id, hass=self._hass
+        )
         _LOGGER.debug("[init] name: " + str(self._attr_name))
         _LOGGER.debug("[init] variable_id: " + str(self._variable_id))
         _LOGGER.debug("[init] entity_id: " + str(self.entity_id))
         _LOGGER.debug("[init] unique_id: " + str(self._attr_unique_id))
         _LOGGER.debug("[init] icon: " + str(self._attr_icon))
-        _LOGGER.debug("[init] value: " + str(self._attr_state))
+        _LOGGER.debug("[init] value: " + str(self._attr_native_value))
         _LOGGER.debug("[init] attributes: " + str(self._attr_extra_state_attributes))
         _LOGGER.debug("[init] restore: " + str(self._restore))
         _LOGGER.debug("[init] force_update: " + str(self._force_update))
@@ -257,28 +204,19 @@ class Variable(SensorEntity, RestoreEntity):
         if self._restore is True:
             # If variable state have been saved.
             _LOGGER.debug("Restoring")
+            sensor = await self.async_get_last_sensor_data()
+            if sensor:
+                _LOGGER.debug("Restored sensor: " + str(sensor.as_dict()))
+                self._attr_native_value = sensor.native_value
             state = await self.async_get_last_state()
-            _LOGGER.debug("Restored state: " + str(state))
             if state:
-                # restore state
-                self._attr_value = state.state
-                # restore value
+                _LOGGER.debug("Restored state: " + str(state.as_dict()))
                 self._attr_extra_state_attributes = state.attributes
 
     @property
     def should_poll(self):
         """If entity should be polled."""
         return False
-
-    # @property
-    # def state(self):
-    #    """Return the state of the component."""
-    #    return self._value
-
-    # @property
-    # def state_attributes(self):
-    #    """Return the attributes of the variable."""
-    #    return self._attributes
 
     @property
     def force_update(self) -> bool:
@@ -287,16 +225,18 @@ class Variable(SensorEntity, RestoreEntity):
 
     async def async_set_variable(
         self,
-        value,
-        attributes,
-        replace_attributes,
-    ):
+        value=None,
+        attributes=None,
+        replace_attributes=False,
+    ) -> None:
         """Update variable."""
+
+        _LOGGER.debug("Starting async_set_variable")
         updated_attributes = None
         updated_value = None
 
-        if not replace_attributes and self._attributes is not None:
-            updated_attributes = dict(self._attributes)
+        if not replace_attributes and self._attr_extra_state_attributes is not None:
+            updated_attributes = dict(self._attr_extra_state_attributes)
 
         if attributes is not None:
             if updated_attributes is not None:
@@ -310,6 +250,6 @@ class Variable(SensorEntity, RestoreEntity):
         self._attr_extra_state_attributes = updated_attributes
 
         if updated_value is not None:
-            self._attr_state = updated_value
+            self._attr_native_value = updated_value
 
         await self.async_update_ha_state()

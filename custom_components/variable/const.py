@@ -1,7 +1,7 @@
 DOMAIN = "variable"
 
 # Defaults
-DEFAULT_ICON = "mdi:map-search-outline"
+DEFAULT_ICON = "mdi:variable"
 DEFAULT_RESTORE = True
 DEFAULT_FORCE_UPDATE = False
 
