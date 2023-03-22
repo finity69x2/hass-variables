@@ -52,13 +52,10 @@ ADD_SENSOR_SCHEMA = vol.Schema(
 )
 
 
-async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
+async def validate_sensor_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
+    """Validate the user input"""
 
-    Data has the keys from DATA_SCHEMA with values provided by the user.
-    """
-
-    _LOGGER.debug("[config_flow validate_input] data: " + str(data))
+    _LOGGER.debug("[config_flow validate_sensor_input] data: " + str(data))
     if data.get(CONF_NAME):
         return {"title": data.get(CONF_NAME)}
     else:
@@ -82,13 +79,14 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
 
             try:
-                info = await validate_input(self.hass, user_input)
+                info = await validate_sensor_input(self.hass, user_input)
                 _LOGGER.debug("[New Variable] info: " + str(info))
                 _LOGGER.debug("[New Variable] user_input: " + str(user_input))
                 return self.async_create_entry(title=info["title"], data=user_input)
             except Exception as err:
                 _LOGGER.exception(
-                    "[config_flow async_step_user] Unexpected exception:" + str(err)
+                    "[config_flow async_step_add_sensor] Unexpected exception:"
+                    + str(err)
                 )
                 errors["base"] = "unknown"
 

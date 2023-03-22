@@ -1,27 +1,27 @@
 {
-    "title": "Variables+History",
-    "config": {
-        "step": {
-            "user": {
-                "title": "Variables+History",
-                "menu_options": {
-                  "add_sensor": "Create a Sensor Variable",
-                  "add_binary_sensor": "Create a Binary Sensor Variable",
-                "description": "Create a new Variable"
-            },
-            "add_sensor": {
-                "title": "Variables+History: Sensor",
-                "data": {
-                    "name": "[%key:common::config_flow::data::name%]",
-                    "variable_id": "Variable ID",
-                    "icon": "Icon",
-                    "value": "Initial Value",
-                    "attributes": "Initial Attributes",
-                    "restore": "Restore on Restart",
-                    "force_update": "Force Update"
-                },
-                "description": "Create a new Variable"
-            }
+  "title": "Variables+History",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Variables+History",
+        "menu_options": {
+          "add_sensor": "Create a Sensor Variable",
+          "add_binary_sensor": "Create a Binary Sensor Variable"
         }
+      },
+      "add_sensor": {
+        "title": "Variables+History - Sensor",
+        "data": {
+          "name": "[%key:common::config_flow::data::name%]",
+          "variable_id": "Variable ID",
+          "icon": "Icon",
+          "value": "Initial Value",
+          "attributes": "Initial Attributes",
+          "restore": "Restore on Restart",
+          "force_update": "Force Update"
+        },
+        "description": "Create a new Sensor Variable"
+      }
     }
   }
+}

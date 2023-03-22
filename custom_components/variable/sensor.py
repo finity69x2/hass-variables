@@ -212,6 +212,7 @@ class Variable(RestoreSensor):
             if state:
                 _LOGGER.debug("Restored state: " + str(state.as_dict()))
                 self._attr_extra_state_attributes = state.attributes
+                self._state = state.state
 
     @property
     def should_poll(self):
