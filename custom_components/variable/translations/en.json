@@ -4,6 +4,13 @@
         "step": {
             "user": {
                 "title": "Variables+History",
+                "menu_options": {
+                  "add_sensor": "Create a Sensor Variable",
+                  "add_binary_sensor": "Create a Binary Sensor Variable",
+                "description": "Create a new Variable\nSee [Configuration Options]({component_config_url}) on GitHub for details"
+            },
+            "add_sensor": {
+                "title": "Variables+History: Sensor",
                 "data": {
                     "name": "Variable Name",
                     "variable_id": "Variable ID",
@@ -17,4 +24,5 @@
             }
         }
     }
+  }
 }

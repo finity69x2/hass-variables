@@ -4,6 +4,13 @@
         "step": {
             "user": {
                 "title": "Variables+History",
+                "menu_options": {
+                  "add_sensor": "Create a Sensor Variable",
+                  "add_binary_sensor": "Create a Binary Sensor Variable",
+                "description": "Create a new Variable"
+            },
+            "add_sensor": {
+                "title": "Variables+History: Sensor",
                 "data": {
                     "name": "[%key:common::config_flow::data::name%]",
                     "variable_id": "Variable ID",

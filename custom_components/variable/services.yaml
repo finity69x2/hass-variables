@@ -18,6 +18,7 @@ update:
       selector:
         object:
     replace_attributes:
+      name: Replace Attributes
       description: Replace or merge current attributes [boolean] (optional) (default false = merge)
       example: false
       selector:
