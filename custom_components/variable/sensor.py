@@ -58,9 +58,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-SERVICE_SET_VARIABLE = "update"
+SERVICE_UPDATE_VARIABLE = "update"
 
-SERVICE_SET_VARIABLE_SCHEMA = vol.Schema(
+SERVICE_UPDATE_VARIABLE_SCHEMA = vol.Schema(
     {
         vol.Optional(ATTR_VALUE): cv.match_all,
         vol.Optional(ATTR_ATTRIBUTES): dict,
@@ -138,13 +138,13 @@ async def async_setup_entry(
     platform = entity_platform.async_get_current_platform()
 
     platform.async_register_entity_service(
-        SERVICE_SET_VARIABLE,
+        SERVICE_UPDATE_VARIABLE,
         {
             vol.Optional(ATTR_VALUE): cv.string,
             vol.Optional(ATTR_ATTRIBUTES): dict,
             vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
         },
-        "async_set_variable",
+        "async_update_variable",
     )
 
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
@@ -186,7 +186,7 @@ class Variable(RestoreSensor):
         self._restore = config.get(CONF_RESTORE)
         self._force_update = config.get(CONF_FORCE_UPDATE)
         self.entity_id = generate_entity_id(
-            ENTITY_ID_FORMAT, "variable_" + self._variable_id, hass=self._hass
+            ENTITY_ID_FORMAT, self._variable_id, hass=self._hass
         )
         _LOGGER.debug("[init] name: " + str(self._attr_name))
         _LOGGER.debug("[init] variable_id: " + str(self._variable_id))
@@ -223,7 +223,7 @@ class Variable(RestoreSensor):
         """Force update status of the entity."""
         return self._force_update
 
-    async def async_set_variable(
+    async def async_update_variable(
         self,
         value=None,
         attributes=None,
@@ -231,7 +231,7 @@ class Variable(RestoreSensor):
     ) -> None:
         """Update variable."""
 
-        _LOGGER.debug("Starting async_set_variable")
+        _LOGGER.debug("Starting async_update_variable")
         updated_attributes = None
         updated_value = None
 

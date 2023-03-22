@@ -1,5 +1,5 @@
 update:
-  name: Set Variable
+  name: Update Variable
   description: Update a variables value and/or its attributes. Must define entity or variable name.
   target:
     entity:

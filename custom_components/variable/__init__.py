@@ -19,8 +19,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# List of platforms to support. There should be a matching .py file for each,
-# eg <cover.py> and <sensor.py>
 PLATFORMS: list[str] = [Platform.SENSOR]
 
 ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
@@ -58,15 +56,72 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         _LOGGER.debug("Starting async_set_variable_legacy_service")
         _LOGGER.debug("call: " + str(call))
 
-        entity_id = ENTITY_ID_FORMAT.format("variable_" + call.data.get(ATTR_VARIABLE))
+        entity_id = ENTITY_ID_FORMAT.format(call.data.get(ATTR_VARIABLE))
+        _LOGGER.debug("entity_id: " + str(entity_id))
         entity_registry = er.async_get(hass)
-        entity = entity_registry.get_entity(entity_id)
+        entity = entity_registry.async_get(entity_id)
 
-        if entity:
-            await entity.async_set_variable(
-                call.data.get(ATTR_VALUE),
-                call.data.get(ATTR_ATTRIBUTES),
-                call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
+        _LOGGER.debug("entity: " + str(entity))
+        _LOGGER.debug("entity platform: " + str(entity.platform))
+        if entity and entity.platform == DOMAIN:
+            _LOGGER.debug("Updating variable")
+            pre_state = hass.states.get(entity_id=entity_id)
+            pre_attr = hass.states.get(entity_id=entity_id).attributes
+            _LOGGER.debug("Previous state: " + str(pre_state.as_dict()))
+            _LOGGER.debug("Previous attr: " + str(pre_attr))
+            if not call.data.get(ATTR_REPLACE_ATTRIBUTES, False):
+                if call.data.get(ATTR_ATTRIBUTES):
+                    new_attr = pre_attr | call.data.get(ATTR_ATTRIBUTES)
+                else:
+                    new_attr = pre_attr
+            else:
+                new_attr = call.data.get(ATTR_ATTRIBUTES)
+            _LOGGER.debug("Updated attr: " + str(new_attr))
+            hass.states.async_set(
+                entity_id=entity_id,
+                new_state=call.data.get(ATTR_VALUE),
+                attributes=new_attr,
+            )
+            _LOGGER.debug(
+                "Post state: " + str(hass.states.get(entity_id=entity_id).as_dict())
+            )
+        else:
+            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
+
+    async def async_set_entity_legacy_service(call):
+        """Handle calls to the set_entity service."""
+
+        _LOGGER.debug("Starting async_set_entity_legacy_service")
+        _LOGGER.debug("call: " + str(call))
+
+        entity_id: str = call.data.get(ATTR_ENTITY)
+        _LOGGER.debug("entity_id: " + str(entity_id))
+        entity_registry = er.async_get(hass)
+        entity = entity_registry.async_get(entity_id)
+
+        _LOGGER.debug("entity: " + str(entity))
+        _LOGGER.debug("entity platform: " + str(entity.platform))
+        if entity and entity.platform == DOMAIN:
+            _LOGGER.debug("Updating variable")
+            pre_state = hass.states.get(entity_id=entity_id)
+            pre_attr = hass.states.get(entity_id=entity_id).attributes
+            _LOGGER.debug("Previous state: " + str(pre_state.as_dict()))
+            _LOGGER.debug("Previous attr: " + str(pre_attr))
+            if not call.data.get(ATTR_REPLACE_ATTRIBUTES, False):
+                if call.data.get(ATTR_ATTRIBUTES):
+                    new_attr = pre_attr | call.data.get(ATTR_ATTRIBUTES)
+                else:
+                    new_attr = pre_attr
+            else:
+                new_attr = call.data.get(ATTR_ATTRIBUTES)
+            _LOGGER.debug("Updated attr: " + str(new_attr))
+            hass.states.async_set(
+                entity_id=entity_id,
+                new_state=call.data.get(ATTR_VALUE),
+                attributes=new_attr,
+            )
+            _LOGGER.debug(
+                "Post state: " + str(hass.states.get(entity_id=entity_id).as_dict())
             )
         else:
             _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
@@ -77,25 +132,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         async_set_variable_legacy_service,
         schema=SERVICE_SET_VARIABLE_LEGACY_SCHEMA,
     )
-
-    async def async_set_entity_legacy_service(call):
-        """Handle calls to the set_entity service."""
-
-        _LOGGER.debug("Starting async_set_entity_legacy_service")
-        _LOGGER.debug("call: " + str(call))
-
-        entity_id: str = call.data.get(ATTR_ENTITY)
-        entity_registry = er.async_get(hass)
-        entity = entity_registry.get_entity(entity_id)
-
-        if entity:
-            await entity.async_set_variable(
-                call.data.get(ATTR_VALUE),
-                call.data.get(ATTR_ATTRIBUTES),
-                call.data.get(ATTR_REPLACE_ATTRIBUTES, False),
-            )
-        else:
-            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
 
     hass.services.async_register(
         DOMAIN,
