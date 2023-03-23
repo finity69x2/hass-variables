@@ -43,8 +43,8 @@ except Exception as e:
     )
     use_issue_reg = False
 
-ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
-# ENTITY_ID_FORMAT = DOMAIN + ".{}"
+PLATFORM = Platform.SENSOR
+ENTITY_ID_FORMAT = PLATFORM + ".{}"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -134,7 +134,7 @@ async def async_setup_entry(
     """Setup the variable entities with a config_entry (config_flow)."""
 
     _LOGGER.debug("Starting async_setup_entry")
-
+    config_entry.options = {}
     platform = entity_platform.async_get_current_platform()
 
     platform.async_register_entity_service(
@@ -149,9 +149,6 @@ async def async_setup_entry(
 
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
     unique_id = config_entry.entry_id
-    _LOGGER.debug(
-        "[async_setup_entry] config_entry type: " + str(config_entry.__class__.__mro__)
-    )
     _LOGGER.debug("[async_setup_entry] config_entry: " + str(config_entry.as_dict()))
     _LOGGER.debug("[async_setup_entry] config: " + str(config))
     _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))

@@ -1,11 +1,13 @@
 DOMAIN = "variable"
 
 # Defaults
+DEFAULT_BINARY_SENSOR_VALUE = False
 DEFAULT_FORCE_UPDATE = False
 DEFAULT_ICON = "mdi:variable"
 DEFAULT_RESTORE = True
 
 CONF_ATTRIBUTES = "attributes"
+CONF_ENTITY_PLATFORM = "entity_platform"
 CONF_FORCE_UPDATE = "force_update"
 CONF_RESTORE = "restore"
 CONF_VALUE = "value"

@@ -21,7 +21,47 @@
           "force_update": "Force Update"
         },
         "description": "Create a new Sensor Variable"
+      },
+      "add_binary_sensor": {
+        "title": "Variables+History - Binary Sensor",
+        "data": {
+          "name": "[%key:common::config_flow::data::name%]",
+          "variable_id": "Variable ID",
+          "icon": "Icon",
+          "value": "Initial Value",
+          "attributes": "Initial Attributes",
+          "restore": "Restore on Restart",
+          "force_update": "Force Update"
+        },
+        "description": "Create a new Binary Sensor Variable"
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {},
+      "sensor_options": {
+        "title": "Variables+History - Sensor",
+        "data": {
+          "restore": "Restore on Restart",
+          "force_update": "Force Update"
+        },
+        "description": "Update existing Variable Sensor"
+      },
+      "binary_sensor_options": {
+        "title": "Variables+History - Binary Sensor",
+        "data": {
+          "restore": "Restore on Restart",
+          "force_update": "Force Update"
+        },
+        "description": "Update existing Variable Binary Sensor"
+      }
+    }
+  },
+  "issues": {
+    "deprecated_yaml": {
+      "title": "Delete the Variable YAML configuration",
+      "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue."
     }
   }
 }

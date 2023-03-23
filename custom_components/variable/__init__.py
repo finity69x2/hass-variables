@@ -14,14 +14,13 @@ from .const import (
     ATTR_REPLACE_ATTRIBUTES,
     ATTR_VALUE,
     ATTR_VARIABLE,
+    CONF_ENTITY_PLATFORM,
     DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[str] = [Platform.SENSOR]
-
-ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
 SERVICE_SET_ENTITY_LEGACY = "set_entity"
@@ -53,6 +52,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
     async def async_set_variable_legacy_service(call):
         """Handle calls to the set_variable service."""
 
+        ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
         _LOGGER.debug("Starting async_set_variable_legacy_service")
         _LOGGER.debug("call: " + str(call))
 
@@ -143,36 +143,21 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
     return True
 
 
-#    async def _handle_reload(service):
-#        """Handle reload service call."""
-#        _LOGGER.info("Service %s.reload called: reloading integration", DOMAIN)
-#
-#        current_entries = hass.config_entries.async_entries(DOMAIN)
-#
-#        reload_tasks = [
-#            hass.config_entries.async_reload(entry.entry_id)
-#            for entry in current_entries
-#        ]
-#
-#        await asyncio.gather(*reload_tasks)
-#
-#    hass.helpers.service.async_register_admin_service(
-#        DOMAIN,
-#        SERVICE_RELOAD,
-#        _handle_reload,
-#    )
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from a config entry."""
 
+    entry.options = {}
     _LOGGER.debug("[init async_setup_entry] entry: " + str(entry.data))
     hass.data.setdefault(DOMAIN, {})
     hass_data = dict(entry.data)
     hass.data[DOMAIN][entry.entry_id] = hass_data
-
-    # This creates each HA object for each platform your device requires.
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # entry.async_on_unload(entry.add_update_listener(update_listener))
+    _LOGGER.debug(
+        "[init async_setup_entry] entity_platform: "
+        + str(hass_data.get(CONF_ENTITY_PLATFORM))
+    )
+    if hass_data.get(CONF_ENTITY_PLATFORM) == Platform.SENSOR:
+        await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
     return True
 
 
@@ -187,3 +172,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+# async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+#    """Handle options update."""
+#
+#    _LOGGER.debug("[init update_listener] entry: " + str(entry.as_dict()))
+#    await hass.config_entries.async_reload(entry.entry_id)
