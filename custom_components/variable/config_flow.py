@@ -208,6 +208,10 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
 
         SENSOR_OPTIONS_SCHEMA = vol.Schema(
             {
+                vol.Optional(CONF_VALUE, default=self.config_entry.data.get(CONF_VALUE)): cv.string,
+                vol.Optional(CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)): selector.ObjectSelector(
+                    selector.ObjectSelectorConfig()
+                ),
                 vol.Optional(
                     CONF_RESTORE,
                     default=self.config_entry.data.get(CONF_RESTORE, DEFAULT_RESTORE),
@@ -218,12 +222,6 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_FORCE_UPDATE, DEFAULT_FORCE_UPDATE
                     ),
                 ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
-                # vol.Optional(
-                #    CONF_SHOW_ALL_SOURCES,
-                #    default=self.config_entry.options.get(
-                #        CONF_SHOW_ALL_SOURCES, DEFAULT_SHOW_SOURCES
-                #    ),
-                # ): bool,
             }
         )
 
@@ -248,6 +246,12 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
 
         BINARY_SENSOR_OPTIONS_SCHEMA = vol.Schema(
             {
+                vol.Optional(
+                    CONF_VALUE, default=self.config_entry.data.get(CONF_VALUE, DEFAULT_BINARY_SENSOR_VALUE)
+                ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+                vol.Optional(CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)): selector.ObjectSelector(
+                    selector.ObjectSelectorConfig()
+                ),
                 vol.Optional(
                     CONF_RESTORE,
                     default=self.config_entry.data.get(CONF_RESTORE, DEFAULT_RESTORE),
