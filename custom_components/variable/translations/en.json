@@ -9,7 +9,7 @@
         }
       },
       "add_sensor": {
-        "title": "Variables+History -  Sensor",
+        "title": "Variables+History - Sensor",
         "data": {
           "name": "Variable Name",
           "variable_id": "Variable ID",
@@ -22,7 +22,7 @@
         "description": "Create a new Sensor Variable\nSee [Configuration Options]({component_config_url}) on GitHub for details"
       },
       "add_binary_sensor": {
-        "title": "Variables+History -  Binary Sensor",
+        "title": "Variables+History - Binary Sensor",
         "data": {
           "name": "Variable Name",
           "variable_id": "Variable ID",
@@ -42,18 +42,22 @@
       "sensor_options": {
         "title": "Variables+History - Sensor",
         "data": {
+          "value": "Value (typically only useful if Restore on Restart is False)",
+          "attributes": "Attributes (typically only useful if Restore on Restart is False)",
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },
-        "description": "**Updating sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
+        "description": "**Updating Sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
       },
       "binary_sensor_options": {
         "title": "Variables+History - Binary Sensor",
         "data": {
+          "value": "Value (typically only useful if Restore on Restart is False)",
+          "attributes": "Attributes (typically only useful if Restore on Restart is False)",
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },
-        "description": "**Updating sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
+        "description": "**Updating Binary Sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
       }
     }
   },

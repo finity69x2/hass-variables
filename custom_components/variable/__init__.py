@@ -16,11 +16,10 @@ from .const import (
     ATTR_VARIABLE,
     CONF_ENTITY_PLATFORM,
     DOMAIN,
+    PLATFORMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-PLATFORMS: list[str] = [Platform.SENSOR]
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
 SERVICE_SET_ENTITY_LEGACY = "set_entity"
@@ -47,10 +46,9 @@ SERVICE_SET_ENTITY_LEGACY_SCHEMA = vol.Schema(
 async def async_setup(hass: HomeAssistant, config: ConfigType):
     """Set up the Variable services."""
     _LOGGER.debug("Starting async_setup")
-    # _LOGGER.debug("[async_setup] config: " + str(config))
 
     async def async_set_variable_legacy_service(call):
-        """Handle calls to the set_variable service."""
+        """Handle calls to the set_variable legacy service."""
 
         ENTITY_ID_FORMAT = Platform.SENSOR + ".{}"
         _LOGGER.debug("Starting async_set_variable_legacy_service")
@@ -86,10 +84,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                 "Post state: " + str(hass.states.get(entity_id=entity_id).as_dict())
             )
         else:
-            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
+            _LOGGER.warning("Failed to set. Unknown Variable: %s", entity_id)
 
     async def async_set_entity_legacy_service(call):
-        """Handle calls to the set_entity service."""
+        """Handle calls to the set_entity legacy service."""
 
         _LOGGER.debug("Starting async_set_entity_legacy_service")
         _LOGGER.debug("call: " + str(call))
@@ -124,7 +122,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                 "Post state: " + str(hass.states.get(entity_id=entity_id).as_dict())
             )
         else:
-            _LOGGER.warning("Failed to set unknown variable: %s", entity_id)
+            _LOGGER.warning("Failed to set. Unknown Variable: %s", entity_id)
 
     hass.services.async_register(
         DOMAIN,
@@ -156,18 +154,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "[init async_setup_entry] entity_platform: "
         + str(hass_data.get(CONF_ENTITY_PLATFORM))
     )
-    if hass_data.get(CONF_ENTITY_PLATFORM) == Platform.SENSOR:
-        await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
+    if hass_data.get(CONF_ENTITY_PLATFORM) in PLATFORMS:
+        await hass.config_entries.async_forward_entry_setups(
+            entry, [hass_data.get(CONF_ENTITY_PLATFORM)]
+        )
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    # This is called when an entry/configured device is to be removed. The class
-    # needs to unload itself, and remove callbacks. See the classes for further
-    # details
+
     _LOGGER.info("Unloading: " + str(entry.data))
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    hass_data = dict(entry.data)
+    if hass_data.get(CONF_ENTITY_PLATFORM) in PLATFORMS:
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, [hass_data.get(CONF_ENTITY_PLATFORM)]
+        )
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 

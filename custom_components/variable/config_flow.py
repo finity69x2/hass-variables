@@ -23,6 +23,7 @@ from .const import (
     DEFAULT_ICON,
     DEFAULT_RESTORE,
     DOMAIN,
+    PLATFORMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -96,7 +97,7 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_menu(
             step_id="user",
-            menu_options=["add_sensor", "add_binary_sensor"],
+            menu_options=["add_" + p for p in PLATFORMS],
         )
 
     async def async_step_add_sensor(self, user_input=None, errors=None):
@@ -179,10 +180,17 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
 
         _LOGGER.debug("[Options] initial config: " + str(self.config_entry.data))
         _LOGGER.debug("[Options] initial options: " + str(self.config_entry.options))
-        if self.config_entry.data.get(CONF_ENTITY_PLATFORM) == Platform.SENSOR:
-            return await self.async_step_sensor_options()
-        elif self.config_entry.data.get(CONF_ENTITY_PLATFORM) == Platform.BINARY_SENSOR:
-            return await self.async_step_binary_sensor_options()
+
+        if self.config_entry.data.get(CONF_ENTITY_PLATFORM) in PLATFORMS and (
+            new_func := getattr(
+                self,
+                "async_step_"
+                + self.config_entry.data.get(CONF_ENTITY_PLATFORM)
+                + "_options",
+                False,
+            )
+        ):
+            return await new_func()
 
     async def async_step_sensor_options(
         self, user_input=None, errors=None
@@ -208,10 +216,12 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
 
         SENSOR_OPTIONS_SCHEMA = vol.Schema(
             {
-                vol.Optional(CONF_VALUE, default=self.config_entry.data.get(CONF_VALUE)): cv.string,
-                vol.Optional(CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)): selector.ObjectSelector(
-                    selector.ObjectSelectorConfig()
-                ),
+                vol.Optional(
+                    CONF_VALUE, default=self.config_entry.data.get(CONF_VALUE)
+                ): cv.string,
+                vol.Optional(
+                    CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)
+                ): selector.ObjectSelector(selector.ObjectSelectorConfig()),
                 vol.Optional(
                     CONF_RESTORE,
                     default=self.config_entry.data.get(CONF_RESTORE, DEFAULT_RESTORE),
@@ -247,11 +257,14 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
         BINARY_SENSOR_OPTIONS_SCHEMA = vol.Schema(
             {
                 vol.Optional(
-                    CONF_VALUE, default=self.config_entry.data.get(CONF_VALUE, DEFAULT_BINARY_SENSOR_VALUE)
+                    CONF_VALUE,
+                    default=self.config_entry.data.get(
+                        CONF_VALUE, DEFAULT_BINARY_SENSOR_VALUE
+                    ),
                 ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
-                vol.Optional(CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)): selector.ObjectSelector(
-                    selector.ObjectSelectorConfig()
-                ),
+                vol.Optional(
+                    CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)
+                ): selector.ObjectSelector(selector.ObjectSelectorConfig()),
                 vol.Optional(
                     CONF_RESTORE,
                     default=self.config_entry.data.get(CONF_RESTORE, DEFAULT_RESTORE),

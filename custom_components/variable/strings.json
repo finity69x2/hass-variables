@@ -43,6 +43,8 @@
       "sensor_options": {
         "title": "Variables+History - Sensor",
         "data": {
+          "value": "Value (typically only useful if Restore on Restart is False)",
+          "attributes": "Attributes (typically only useful if Restore on Restart is False)",
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },
@@ -51,6 +53,8 @@
       "binary_sensor_options": {
         "title": "Variables+History - Binary Sensor",
         "data": {
+          "value": "Value (typically only useful if Restore on Restart is False)",
+          "attributes": "Attributes (typically only useful if Restore on Restart is False)",
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },

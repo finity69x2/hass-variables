@@ -1,4 +1,8 @@
+from homeassistant.const import Platform
+
 DOMAIN = "variable"
+
+PLATFORMS: list[str] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
 # Defaults
 DEFAULT_BINARY_SENSOR_VALUE = False

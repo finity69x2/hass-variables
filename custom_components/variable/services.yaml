@@ -1,9 +1,10 @@
-update:
-  name: Update Variable
-  description: Update a variables value and/or its attributes. Must define entity or variable name.
+update_sensor:
+  name: Update Sensor Variable
+  description: Update a Sensor Variable value and/or its attributes.
   target:
     entity:
       integration: variable
+      domain: sensor
   fields:
     value:
       name: New Value
@@ -24,15 +25,42 @@ update:
       selector:
         boolean:
 
+update_binary_sensor:
+  name: Update Binary Sensor Variable
+  description: Update a Binary Sensor Variable value and/or its attributes.
+  target:
+    entity:
+      integration: variable
+      domain: binary_sensor
+  fields:
+    value:
+      name: New Value
+      description: New value to set [boolean] (optional)
+      example: false
+      selector:
+        boolean:
+    attributes:
+      name: New Attributes
+      description: Attributes to set or update [dictionary] (optional)
+      example: {"attribute": "value"}
+      selector:
+        object:
+    replace_attributes:
+      name: Replace Attributes
+      description: Replace or merge current attributes [boolean] (optional) (default false = merge)
+      example: false
+      selector:
+        boolean:
+
 set_variable:
   # Description of the service
   name: Set Variable (Legacy)
-  description: "Legacy service: Update a variables value and/or its attributes."
+  description: "Legacy service: Update a Sensor Variable value and/or its attributes. Will only work on Sensor Variables. Use one of the variable.update_ services for additional options."
   # Different fields that your service accepts
   fields:
     # Key of the field
     variable:
-      description: string (required) The name of the variable to update
+      description: string (required) The name of the Sensor Variable to update
       required: true
       example: test_counter
       selector:
@@ -53,15 +81,16 @@ set_variable:
 
 set_entity:
   name: Set Entity (Legacy)
-  description: "Legacy service: Update an entity value and/or its attributes."
+  description: "Legacy service: Update a Sensor Variable value and/or its attributes. Will only work on Sensor Variables. Use one of the variable.update_ services for additional options."
   fields:
     entity:
-      description: string (required) The id of the entity to update
+      description: string (required) The entity_id of the Sensor Variable to update
       example: sensor.test_sensor
       required: true
       selector:
         entity:
           integration: variable
+          domain: sensor
     value:
       description: any (optional) New value to set
       example: 9
