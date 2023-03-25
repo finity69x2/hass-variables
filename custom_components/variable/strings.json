@@ -63,9 +63,16 @@
     }
   },
   "issues": {
-    "deprecated_yaml": {
-      "title": "Delete the Variable YAML configuration",
-      "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue."
+    "restart_required_variable": {
+      "title": "Delete the Variable YAML configuration and restart",
+      "fix_flow": {
+        "step": {
+          "confirm_restart": {
+            "title": "Delete the Variable YAML configuration and restart",
+            "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue.\n\nClick Submit to Restart Home Assistant."
+          }
+        }
+      }
     }
   }
 }

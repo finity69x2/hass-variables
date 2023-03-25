@@ -80,11 +80,11 @@ ADD_BINARY_SENSOR_SCHEMA = vol.Schema(
 async def validate_sensor_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     """Validate the user input"""
 
-    _LOGGER.debug("[config_flow validate_sensor_input] data: " + str(data))
+    # _LOGGER.debug("[config_flow validate_sensor_input] data: " + str(data))
     if data.get(CONF_NAME):
         return {"title": data.get(CONF_NAME)}
     else:
-        return {"title": data.get(CONF_VARIABLE_ID)}
+        return {"title": data.get(CONF_VARIABLE_ID, "")}
 
 
 class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -108,7 +108,9 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_sensor_input(self.hass, user_input)
                 _LOGGER.debug("[New Sensor Variable] info: " + str(info))
                 _LOGGER.debug("[New Sensor Variable] user_input: " + str(user_input))
-                return self.async_create_entry(title=info["title"], data=user_input)
+                return self.async_create_entry(
+                    title=info.get("title", ""), data=user_input
+                )
             except Exception as err:
                 _LOGGER.exception(
                     "[config_flow async_step_add_sensor] Unexpected exception:"
@@ -136,7 +138,9 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.debug(
                     "[New Binary Sensor Variable] user_input: " + str(user_input)
                 )
-                return self.async_create_entry(title=info["title"], data=user_input)
+                return self.async_create_entry(
+                    title=info.get("title", ""), data=user_input
+                )
             except Exception as err:
                 _LOGGER.exception(
                     "[config_flow async_step_add_binary_sensor] Unexpected exception:"
@@ -153,6 +157,13 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 "component_config_url": COMPONENT_CONFIG_URL,
             },
         )
+
+    # this is run to import the configuration.yaml parameters\
+    async def async_step_import(self, import_config=None) -> FlowResult:
+        """Import a config entry from configuration.yaml."""
+
+        # _LOGGER.debug("[async_step_import] import_config: " + str(import_config))
+        return await self.async_step_add_sensor(import_config)
 
     @staticmethod
     @callback
@@ -175,11 +186,9 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
 
-        _LOGGER.debug("Starting Options")
-        # errors = {}
-
-        _LOGGER.debug("[Options] initial config: " + str(self.config_entry.data))
-        _LOGGER.debug("[Options] initial options: " + str(self.config_entry.options))
+        # _LOGGER.debug("Starting Options")
+        # _LOGGER.debug("[Options] initial config: " + str(self.config_entry.data))
+        # _LOGGER.debug("[Options] initial options: " + str(self.config_entry.options))
 
         if self.config_entry.data.get(CONF_ENTITY_PLATFORM) in PLATFORMS and (
             new_func := getattr(
@@ -196,7 +205,7 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input=None, errors=None
     ) -> FlowResult:
 
-        _LOGGER.debug("Starting Sensor Options")
+        # _LOGGER.debug("Starting Sensor Options")
         if user_input is not None:
             _LOGGER.debug("[Sensor Options] user_input: " + str(user_input))
 
@@ -204,10 +213,7 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
                 user_input.setdefault(m, self.config_entry.data[m])
             _LOGGER.debug("[Sensor Options] updated user_input: " + str(user_input))
             self.config_entry.options = {}
-            _LOGGER.debug(
-                "[Sensor Options] cleared config_entry.options: "
-                + str(self.config_entry.options)
-            )
+
             self.hass.config_entries.async_update_entry(
                 self.config_entry, data=user_input, options=self.config_entry.options
             )
@@ -240,7 +246,7 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=SENSOR_OPTIONS_SCHEMA,
             description_placeholders={
                 "component_config_url": COMPONENT_CONFIG_URL,
-                "sensor_name": self.config_entry.data.get(
+                "entity_name": self.config_entry.data.get(
                     CONF_NAME, self.config_entry.data.get(CONF_VARIABLE_ID)
                 ),
             },
@@ -283,7 +289,7 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=BINARY_SENSOR_OPTIONS_SCHEMA,
             description_placeholders={
                 "component_config_url": COMPONENT_CONFIG_URL,
-                "sensor_name": self.config_entry.data.get(
+                "entity_name": self.config_entry.data.get(
                     CONF_NAME, self.config_entry.data.get(CONF_VARIABLE_ID)
                 ),
             },

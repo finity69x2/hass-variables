@@ -1,21 +1,11 @@
-# import asyncio
-# from datetime import timedelta
 import logging
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA, RestoreSensor
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import (  # SERVICE_RELOAD,
-    CONF_ICON,
-    CONF_NAME,
-    EVENT_HOMEASSISTANT_START,
-    Platform,
-)
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_ICON, CONF_NAME, Platform
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity import generate_entity_id
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_call_later
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util import slugify
 import voluptuous as vol
 
@@ -32,16 +22,6 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-try:
-    use_issue_reg = True
-    from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
-except Exception as e:
-    _LOGGER.debug(
-        "Unknown Exception trying to import issue_registry. Is HA version <2022.9?: "
-        + str(e)
-    )
-    use_issue_reg = False
 
 PLATFORM = Platform.SENSOR
 ENTITY_ID_FORMAT = PLATFORM + ".{}"
@@ -69,62 +49,6 @@ SERVICE_UPDATE_VARIABLE_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType = None,
-) -> None:
-    """Set up Sensor Variable from YAML."""
-
-    @callback
-    def schedule_import(_):
-        """Schedule delayed import after HA is fully started."""
-        _LOGGER.debug("[YAML Import] Awaiting HA Startup before importing")
-        async_call_later(hass, 10, do_import)
-
-    @callback
-    def do_import(_):
-        """Process YAML import."""
-        _LOGGER.debug("[YAML Import] HA Started, proceeding")
-        if validate_import():
-            _LOGGER.warning(
-                "[YAML Import] New YAML sensor, importing: "
-                + str(import_config.get(CONF_NAME))
-            )
-
-            if use_issue_reg and import_config is not None:
-                async_create_issue(
-                    hass,
-                    DOMAIN,
-                    "deprecated_yaml",
-                    is_fixable=False,
-                    severity=IssueSeverity.WARNING,
-                    translation_key="deprecated_yaml",
-                )
-
-            hass.async_create_task(
-                hass.config_entries.flow.async_init(
-                    DOMAIN,
-                    context={"source": SOURCE_IMPORT},
-                    data=import_config,
-                )
-            )
-        # else:
-        #    _LOGGER.debug("[YAML Import] Failed validation, not importing")
-
-    @callback
-    def validate_import():
-
-        _LOGGER.debug("Starting YAML validate_import")
-        return True
-
-    import_config = dict(config)
-    _LOGGER.debug("[YAML Import] initial import_config: " + str(import_config))
-
-    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_START, schedule_import)
-
-
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -133,7 +57,7 @@ async def async_setup_entry(
 
     """Setup the Sensor Variable entity with a config_entry (config_flow)."""
 
-    _LOGGER.debug("Starting async_setup_entry")
+    # _LOGGER.debug("Starting async_setup_entry")
     config_entry.options = {}
     platform = entity_platform.async_get_current_platform()
 
@@ -150,7 +74,7 @@ async def async_setup_entry(
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
     unique_id = config_entry.entry_id
     _LOGGER.debug("[async_setup_entry] config_entry: " + str(config_entry.as_dict()))
-    _LOGGER.debug("[async_setup_entry] config: " + str(config))
+    # _LOGGER.debug("[async_setup_entry] config: " + str(config))
     _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))
 
     async_add_entities([Variable(hass, config, unique_id)])
@@ -185,21 +109,21 @@ class Variable(RestoreSensor):
         self.entity_id = generate_entity_id(
             ENTITY_ID_FORMAT, self._variable_id, hass=self._hass
         )
-        _LOGGER.debug("[init] name: " + str(self._attr_name))
-        _LOGGER.debug("[init] variable_id: " + str(self._variable_id))
-        _LOGGER.debug("[init] entity_id: " + str(self.entity_id))
-        _LOGGER.debug("[init] unique_id: " + str(self._attr_unique_id))
-        _LOGGER.debug("[init] icon: " + str(self._attr_icon))
-        _LOGGER.debug("[init] value: " + str(self._attr_native_value))
-        _LOGGER.debug("[init] attributes: " + str(self._attr_extra_state_attributes))
-        _LOGGER.debug("[init] restore: " + str(self._restore))
-        _LOGGER.debug("[init] force_update: " + str(self._force_update))
+        # _LOGGER.debug("[init] name: " + str(self._attr_name))
+        # _LOGGER.debug("[init] variable_id: " + str(self._variable_id))
+        # _LOGGER.debug("[init] entity_id: " + str(self.entity_id))
+        # _LOGGER.debug("[init] unique_id: " + str(self._attr_unique_id))
+        # _LOGGER.debug("[init] icon: " + str(self._attr_icon))
+        # _LOGGER.debug("[init] value: " + str(self._attr_native_value))
+        # _LOGGER.debug("[init] attributes: " + str(self._attr_extra_state_attributes))
+        # _LOGGER.debug("[init] restore: " + str(self._restore))
+        # _LOGGER.debug("[init] force_update: " + str(self._force_update))
 
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
         if self._restore is True:
-            _LOGGER.debug("Restoring")
+            _LOGGER.info("Restoring: " + str(self._attr_name))
             sensor = await self.async_get_last_sensor_data()
             if sensor:
                 _LOGGER.debug("Restored sensor: " + str(sensor.as_dict()))
@@ -228,7 +152,7 @@ class Variable(RestoreSensor):
     ) -> None:
         """Update Sensor Variable."""
 
-        _LOGGER.debug("Starting async_update_variable")
+        # _LOGGER.debug("Starting async_update_variable")
         updated_attributes = None
         updated_value = None
 

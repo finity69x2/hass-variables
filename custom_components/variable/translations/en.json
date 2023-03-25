@@ -47,7 +47,7 @@
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },
-        "description": "**Updating Sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
+        "description": "**Updating Sensor:&nbsp;{entity_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
       },
       "binary_sensor_options": {
         "title": "Variables+History - Binary Sensor",
@@ -57,14 +57,21 @@
           "restore": "Restore on Restart",
           "force_update": "Force Update"
         },
-        "description": "**Updating Binary Sensor:&nbsp;{sensor_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
+        "description": "**Updating Binary Sensor:&nbsp;{entity_name}**\nSee [Configuration Options]({component_config_url}) on GitHub for details"
       }
     }
   },
   "issues": {
-    "deprecated_yaml": {
-      "title": "Delete the Variable YAML configuration",
-      "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue."
+    "restart_required_variable": {
+      "title": "Delete the Variable YAML configuration and restart",
+      "fix_flow": {
+        "step": {
+          "confirm_restart": {
+            "title": "Delete the Variable YAML configuration and restart",
+            "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue.\n\nClick Submit to Restart Home Assistant."
+          }
+        }
+      }
     }
   }
 }

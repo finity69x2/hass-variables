@@ -1,8 +1,9 @@
 """Variable implementation for Home Assistant."""
+import json
 import logging
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.const import CONF_FRIENDLY_NAME, CONF_ICON, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
@@ -14,12 +15,27 @@ from .const import (
     ATTR_REPLACE_ATTRIBUTES,
     ATTR_VALUE,
     ATTR_VARIABLE,
+    CONF_ATTRIBUTES,
     CONF_ENTITY_PLATFORM,
+    CONF_FORCE_UPDATE,
+    CONF_RESTORE,
+    CONF_VALUE,
+    CONF_VARIABLE_ID,
     DOMAIN,
     PLATFORMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+try:
+    use_issue_reg = True
+    from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+except Exception as e:
+    _LOGGER.debug(
+        "Unknown Exception trying to import issue_registry. Is HA version <2022.9?: "
+        + str(e)
+    )
+    use_issue_reg = False
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
 SERVICE_SET_ENTITY_LEGACY = "set_entity"
@@ -46,6 +62,7 @@ SERVICE_SET_ENTITY_LEGACY_SCHEMA = vol.Schema(
 async def async_setup(hass: HomeAssistant, config: ConfigType):
     """Set up the Variable services."""
     _LOGGER.debug("Starting async_setup")
+    # _LOGGER.debug("[async_setup] config: " + str(config))
 
     async def async_set_variable_legacy_service(call):
         """Handle calls to the set_variable legacy service."""
@@ -138,6 +155,52 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         schema=SERVICE_SET_ENTITY_LEGACY_SCHEMA,
     )
 
+    _LOGGER.debug("*******************************************************************")
+    variables = json.loads(json.dumps(config.get(DOMAIN, {})))
+    # _LOGGER.debug("[async_setup] variables: " + str(variables))
+
+    if variables and use_issue_reg:
+        async_create_issue(
+            hass,
+            DOMAIN,
+            "restart_required_variable",
+            is_fixable=True,
+            severity=IssueSeverity.WARNING,
+            translation_key="restart_required_variable",
+        )
+
+    for var, var_fields in variables.items():
+        if var is not None and var not in {
+            entry.data.get(CONF_VARIABLE_ID)
+            for entry in hass.config_entries.async_entries(DOMAIN)
+        }:
+            _LOGGER.warning("[YAML Import] New YAML sensor, importing: " + str(var))
+            _LOGGER.debug("[YAML Import] var_fields: " + str(var_fields))
+
+            attr = var_fields.get(CONF_ATTRIBUTES, {})
+            icon = attr.pop(CONF_ICON, None)
+            name = var_fields.get(CONF_NAME, attr.pop(CONF_FRIENDLY_NAME, None))
+            attr.pop(CONF_FRIENDLY_NAME, None)
+
+            hass.async_create_task(
+                hass.config_entries.flow.async_init(
+                    DOMAIN,
+                    context={"source": SOURCE_IMPORT},
+                    data={
+                        CONF_ENTITY_PLATFORM: Platform.SENSOR,
+                        CONF_VARIABLE_ID: var,
+                        CONF_NAME: name,
+                        CONF_VALUE: var_fields.get(CONF_VALUE),
+                        CONF_RESTORE: var_fields.get(CONF_RESTORE),
+                        CONF_FORCE_UPDATE: var_fields.get(CONF_FORCE_UPDATE),
+                        CONF_ATTRIBUTES: attr,
+                        CONF_ICON: icon,
+                    },
+                )
+            )
+        else:
+            _LOGGER.info("[YAML Import] Already Imported: " + str(var))
+
     return True
 
 
@@ -149,7 +212,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass_data = dict(entry.data)
     hass.data[DOMAIN][entry.entry_id] = hass_data
-    # entry.async_on_unload(entry.add_update_listener(update_listener))
     _LOGGER.debug(
         "[init async_setup_entry] entity_platform: "
         + str(hass_data.get(CONF_ENTITY_PLATFORM))
