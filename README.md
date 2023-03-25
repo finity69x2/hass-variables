@@ -1,6 +1,10 @@
 # Variables+History
 ### aka. `variable`
 
+<picture>
+  <img alt="Variable Logo" src="https://github.com/Wibias/hass-variables/raw/master/logo/icon.png">
+</picture>
+
 A Home Assistant Integration to declare and set/update variables.
 
 Forked and updated from initial integration developed by [rogro82](https://github.com/rogro82)
