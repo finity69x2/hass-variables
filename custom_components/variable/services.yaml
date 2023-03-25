@@ -8,20 +8,22 @@ update_sensor:
   fields:
     value:
       name: New Value
-      description: New value to set [any] (optional)
+      description: New value to set (optional)
       example: 9
       selector:
         text:
     attributes:
       name: New Attributes
       description: Attributes to set or update [dictionary] (optional)
-      example: {"attribute": "value"}
+      example: "{'key': 'value'}"
       selector:
         object:
     replace_attributes:
       name: Replace Attributes
       description: Replace or merge current attributes [boolean] (optional) (default false = merge)
-      example: false
+      required: true
+      default: false
+      example: "false"
       selector:
         boolean:
 
@@ -36,19 +38,26 @@ update_binary_sensor:
     value:
       name: New Value
       description: New value to set [boolean] (optional)
-      example: false
+      required: false
+      example: "false"
       selector:
-        boolean:
+        select:
+          mode: list
+          options:
+            - true
+            - false
     attributes:
       name: New Attributes
       description: Attributes to set or update [dictionary] (optional)
-      example: {"attribute": "value"}
+      example: "{'key': 'value'}"
       selector:
         object:
     replace_attributes:
       name: Replace Attributes
       description: Replace or merge current attributes [boolean] (optional) (default false = merge)
-      example: false
+      required: true
+      default: false
+      example: "false"
       selector:
         boolean:
 
@@ -75,11 +84,15 @@ set_variable:
     attributes:
       name: New Attributes
       description: dictionary (optional) Attributes to set or update
+      example: "{'key': 'value'}"
       selector:
         object:
     replace_attributes:
       name: Replace Attributes
       description: boolean (optional) Replace or merge current attributes (default false = merge)
+      required: true
+      default: false
+      example: "false"
       selector:
         boolean:
 
@@ -105,10 +118,14 @@ set_entity:
     attributes:
       name: New Attributes
       description: dictionary (optional) Attributes to set or update
+      example: "{'key': 'value'}"
       selector:
         object:
     replace_attributes:
       name: Replace Attributes
       description: boolean (optional) Replace or merge current attributes (default false = merge)
+      required: true
+      default: false
+      example: "false"
       selector:
         boolean:

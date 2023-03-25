@@ -21,6 +21,7 @@ from .const import (
     CONF_RESTORE,
     CONF_VALUE,
     CONF_VARIABLE_ID,
+    DEFAULT_REPLACE_ATTRIBUTES,
     DOMAIN,
     PLATFORMS,
 )
@@ -45,7 +46,9 @@ SERVICE_SET_VARIABLE_LEGACY_SCHEMA = vol.Schema(
         vol.Required(ATTR_VARIABLE): cv.string,
         vol.Optional(ATTR_VALUE): cv.match_all,
         vol.Optional(ATTR_ATTRIBUTES): dict,
-        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+        vol.Optional(
+            ATTR_REPLACE_ATTRIBUTES, default=DEFAULT_REPLACE_ATTRIBUTES
+        ): cv.boolean,
     }
 )
 
@@ -54,7 +57,9 @@ SERVICE_SET_ENTITY_LEGACY_SCHEMA = vol.Schema(
         vol.Required(ATTR_ENTITY): cv.string,
         vol.Optional(ATTR_VALUE): cv.match_all,
         vol.Optional(ATTR_ATTRIBUTES): dict,
-        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+        vol.Optional(
+            ATTR_REPLACE_ATTRIBUTES, default=DEFAULT_REPLACE_ATTRIBUTES
+        ): cv.boolean,
     }
 )
 

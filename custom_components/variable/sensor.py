@@ -18,6 +18,7 @@ from .const import (
     CONF_RESTORE,
     CONF_VALUE,
     CONF_VARIABLE_ID,
+    DEFAULT_REPLACE_ATTRIBUTES,
     DOMAIN,
 )
 
@@ -40,14 +41,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 SERVICE_UPDATE_VARIABLE = "update_" + PLATFORM
 
-SERVICE_UPDATE_VARIABLE_SCHEMA = vol.Schema(
-    {
-        vol.Optional(ATTR_VALUE): cv.match_all,
-        vol.Optional(ATTR_ATTRIBUTES): dict,
-        vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
-    }
-)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -66,7 +59,9 @@ async def async_setup_entry(
         {
             vol.Optional(ATTR_VALUE): cv.string,
             vol.Optional(ATTR_ATTRIBUTES): dict,
-            vol.Optional(ATTR_REPLACE_ATTRIBUTES): cv.boolean,
+            vol.Optional(
+                ATTR_REPLACE_ATTRIBUTES, default=DEFAULT_REPLACE_ATTRIBUTES
+            ): cv.boolean,
         },
         "async_update_variable",
     )
