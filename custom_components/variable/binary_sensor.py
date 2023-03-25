@@ -89,6 +89,13 @@ class Variable(BinarySensorEntity, RestoreEntity):
     ):
         """Initialize a Binary Sensor Variable."""
         _LOGGER.debug("[init] config: " + str(config))
+        if config.get(CONF_VALUE):
+            if config.get(CONF_VALUE).lower() in ["true", "1", "t", "y", "yes"]:
+                bool_val = True
+            else:
+                bool_val = False
+        else:
+            bool_val = None
         self._hass = hass
         self._attr_has_entity_name = True
         self._variable_id = slugify(config.get(CONF_VARIABLE_ID).lower())
@@ -98,7 +105,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
         else:
             self._attr_name = config.get(CONF_VARIABLE_ID)
         self._attr_icon = config.get(CONF_ICON)
-        self._attr_is_on = config.get(CONF_VALUE)
+        self._attr_is_on = bool_val
         self._attr_extra_state_attributes = config.get(CONF_ATTRIBUTES)
         self._restore = config.get(CONF_RESTORE)
         self._force_update = config.get(CONF_FORCE_UPDATE)

@@ -43,9 +43,10 @@ update_binary_sensor:
       selector:
         select:
           mode: list
+          translation_key: "boolean_options"
           options:
-            - true
-            - false
+            - "true"
+            - "false"
     attributes:
       name: New Attributes
       description: Attributes to set or update [dictionary] (optional)

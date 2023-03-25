@@ -5,7 +5,6 @@ DOMAIN = "variable"
 PLATFORMS: list[str] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
 # Defaults
-DEFAULT_BINARY_SENSOR_VALUE = False
 DEFAULT_FORCE_UPDATE = False
 DEFAULT_ICON = "mdi:variable"
 DEFAULT_REPLACE_ATTRIBUTES = False

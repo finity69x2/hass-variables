@@ -18,7 +18,6 @@ from .const import (
     CONF_RESTORE,
     CONF_VALUE,
     CONF_VARIABLE_ID,
-    DEFAULT_BINARY_SENSOR_VALUE,
     DEFAULT_FORCE_UPDATE,
     DEFAULT_ICON,
     DEFAULT_RESTORE,
@@ -61,9 +60,15 @@ ADD_BINARY_SENSOR_SCHEMA = vol.Schema(
         vol.Optional(CONF_ICON, default=DEFAULT_ICON): selector.IconSelector(
             selector.IconSelectorConfig()
         ),
-        vol.Optional(
-            CONF_VALUE, default=DEFAULT_BINARY_SENSOR_VALUE
-        ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+        vol.Optional(CONF_VALUE): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=["true", "false"],
+                translation_key="boolean_options",
+                multiple=False,
+                custom_value=False,
+                mode=selector.SelectSelectorMode.LIST,
+            )
+        ),
         vol.Optional(CONF_ATTRIBUTES): selector.ObjectSelector(
             selector.ObjectSelectorConfig()
         ),
@@ -264,10 +269,16 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
             {
                 vol.Optional(
                     CONF_VALUE,
-                    default=self.config_entry.data.get(
-                        CONF_VALUE, DEFAULT_BINARY_SENSOR_VALUE
-                    ),
-                ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+                    default=self.config_entry.data.get(CONF_VALUE),
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=["true", "false"],
+                        translation_key="boolean_options",
+                        multiple=False,
+                        custom_value=False,
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
                 vol.Optional(
                     CONF_ATTRIBUTES, default=self.config_entry.data.get(CONF_ATTRIBUTES)
                 ): selector.ObjectSelector(selector.ObjectSelectorConfig()),

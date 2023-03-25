@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "Variables+History",
         "menu_options": {
           "add_sensor": "Create a Sensor Variable",
           "add_binary_sensor": "Create a Binary Sensor Variable"
@@ -71,6 +70,14 @@
             "description": "Your existing YAML configuration has been imported into the UI automatically.\n\nRemove the Variable YAML configuration from your configuration.yaml file and restart Home Assistant to fix this issue.\n\nClick Submit to Restart Home Assistant."
           }
         }
+      }
+    }
+  },
+  "selector": {
+    "boolean_options": {
+      "options": {
+        "true": "true",
+        "false": "false"
       }
     }
   }
