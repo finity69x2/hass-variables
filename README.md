@@ -1,5 +1,5 @@
 # Variables+History
-#### aka. `variable`
+### aka. `variable`
 
 A Home Assistant Integration to declare and set/update variables.
 
@@ -20,7 +20,7 @@ Forked and updated from initial integration developed by [rogro82](https://githu
 <details>
 <summary><h3>Manual</h3></summary>
 
-You probably <u>do not</u> want to do this! Use the HACS method above unless you know what you are doing and have a good reason as to why you are installing manually
+You probably **do not** want to do this! Use the HACS method above unless you know what you are doing and have a good reason as to why you are installing manually
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`)
 1. If you do not have a `custom_components` directory there, you need to create it
