@@ -61,7 +61,7 @@ SERVICE_SET_ENTITY_LEGACY_SCHEMA = vol.Schema(
 
 async def async_setup(hass: HomeAssistant, config: ConfigType):
     """Set up the Variable services."""
-    _LOGGER.debug("Starting async_setup")
+    # _LOGGER.debug("Starting async_setup")
     # _LOGGER.debug("[async_setup] config: " + str(config))
 
     async def async_set_variable_legacy_service(call):
@@ -155,7 +155,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
         schema=SERVICE_SET_ENTITY_LEGACY_SCHEMA,
     )
 
-    _LOGGER.debug("*******************************************************************")
+    # _LOGGER.debug("*******************************************************************")
     variables = json.loads(json.dumps(config.get(DOMAIN, {})))
     # _LOGGER.debug("[async_setup] variables: " + str(variables))
 
