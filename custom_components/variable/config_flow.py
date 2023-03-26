@@ -118,7 +118,7 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             except Exception as err:
                 _LOGGER.exception(
-                f"[config_flow async_step_add_sensor] Unexpected exception: {err}"
+                    f"[config_flow async_step_add_sensor] Unexpected exception: {err}"
                 )
                 errors["base"] = "unknown"
 

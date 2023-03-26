@@ -137,7 +137,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
             state = await self.async_get_last_state()
             if state:
                 _LOGGER.debug(
-                f"({self._attr_name}) Restored state: {state.as_dict()}"
+                    f"({self._attr_name}) Restored state: {state.as_dict()}"
                 )
                 self._attr_extra_state_attributes = state.attributes
                 if state.state == STATE_OFF:

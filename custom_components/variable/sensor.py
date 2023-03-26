@@ -133,13 +133,13 @@ class Variable(RestoreSensor):
             sensor = await self.async_get_last_sensor_data()
             if sensor:
                 _LOGGER.debug(
-                f"({self._attr_name}) Restored sensor: {sensor.as_dict()}"
+                    f"({self._attr_name}) Restored sensor: {sensor.as_dict()}"
                 )
                 self._attr_native_value = sensor.native_value
             state = await self.async_get_last_state()
             if state:
                 _LOGGER.debug(
-                f"({self._attr_name}) Restored state: {state.as_dict()}"
+                    f"({self._attr_name}) Restored state: {state.as_dict()}"
                 )
                 self._attr_extra_state_attributes = state.attributes
 
@@ -148,8 +148,8 @@ class Variable(RestoreSensor):
                 # self._state = state.state
                 if state and (sensor.native_value != state.state):
                     _LOGGER.info(
-                    f"({self._attr_name}) Restored values are different. "
-                    f"native_value: {sensor.native_value} | state: {state.state}"
+                        f"({self._attr_name}) Restored values are different. "
+                        f"native_value: {sensor.native_value} | state: {state.state}"
                     )
                 if state.state is not None and state.state.lower() not in [
                     "unknown",
