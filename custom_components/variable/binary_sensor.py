@@ -2,7 +2,14 @@ import logging
 
 from homeassistant.components.binary_sensor import PLATFORM_SCHEMA, BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ICON, CONF_NAME, STATE_OFF, STATE_ON, Platform
+from homeassistant.const import (
+    ATTR_FRIENDLY_NAME,
+    CONF_ICON,
+    CONF_NAME,
+    STATE_OFF,
+    STATE_ON,
+    Platform,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity import generate_entity_id
@@ -19,7 +26,10 @@ from .const import (
     CONF_RESTORE,
     CONF_VALUE,
     CONF_VARIABLE_ID,
+    DEFAULT_FORCE_UPDATE,
+    DEFAULT_ICON,
     DEFAULT_REPLACE_ATTRIBUTES,
+    DEFAULT_RESTORE,
     DOMAIN,
 )
 
@@ -32,11 +42,11 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_VARIABLE_ID): cv.string,
         vol.Optional(CONF_NAME): cv.string,
-        vol.Optional(CONF_ICON): cv.string,
+        vol.Optional(CONF_ICON, default=DEFAULT_ICON): cv.string,
         vol.Optional(CONF_VALUE): cv.boolean,
         vol.Optional(CONF_ATTRIBUTES): dict,
-        vol.Optional(CONF_RESTORE): cv.boolean,
-        vol.Optional(CONF_FORCE_UPDATE): cv.boolean,
+        vol.Optional(CONF_RESTORE, default=DEFAULT_RESTORE): cv.boolean,
+        vol.Optional(CONF_FORCE_UPDATE, default=DEFAULT_FORCE_UPDATE): cv.boolean,
     }
 )
 
@@ -51,7 +61,6 @@ async def async_setup_entry(
 
     """Setup the Binary Sensor Variable entity with a config_entry (config_flow)."""
 
-    # _LOGGER.debug("Starting async_setup_entry")
     config_entry.options = {}
     platform = entity_platform.async_get_current_platform()
 
@@ -69,11 +78,11 @@ async def async_setup_entry(
 
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
     unique_id = config_entry.entry_id
-    _LOGGER.debug("[async_setup_entry] config_entry: " + str(config_entry.as_dict()))
+    # _LOGGER.debug("[async_setup_entry] config_entry: " + str(config_entry.as_dict()))
     # _LOGGER.debug("[async_setup_entry] config: " + str(config))
-    _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))
+    # _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))
 
-    async_add_entities([Variable(hass, config, unique_id)])
+    async_add_entities([Variable(hass, config, config_entry, unique_id)])
 
     return True
 
@@ -85,10 +94,16 @@ class Variable(BinarySensorEntity, RestoreEntity):
         self,
         hass,
         config,
+        config_entry,
         unique_id,
     ):
         """Initialize a Binary Sensor Variable."""
-        _LOGGER.debug("[init] config: " + str(config))
+        _LOGGER.debug(
+            "("
+            + str(config.get(CONF_NAME, config.get(CONF_VARIABLE_ID)))
+            + ") [init] config: "
+            + str(config)
+        )
         if config.get(CONF_VALUE):
             if config.get(CONF_VALUE).lower() in ["true", "1", "t", "y", "yes"]:
                 bool_val = True
@@ -97,10 +112,12 @@ class Variable(BinarySensorEntity, RestoreEntity):
         else:
             bool_val = None
         self._hass = hass
+        self._config = config
+        self._config_entry = config_entry
         self._attr_has_entity_name = True
         self._variable_id = slugify(config.get(CONF_VARIABLE_ID).lower())
         self._attr_unique_id = unique_id
-        if config.get(CONF_NAME):
+        if config.get(CONF_NAME) is not None:
             self._attr_name = config.get(CONF_NAME)
         else:
             self._attr_name = config.get(CONF_VARIABLE_ID)
@@ -126,10 +143,15 @@ class Variable(BinarySensorEntity, RestoreEntity):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
         if self._restore is True:
-            _LOGGER.info("Restoring: " + str(self._attr_name))
+            _LOGGER.info("(" + str(self._attr_name) + ") Restoring after Reboot")
             state = await self.async_get_last_state()
             if state:
-                _LOGGER.debug("Restored state: " + str(state.as_dict()))
+                _LOGGER.debug(
+                    "("
+                    + str(self._attr_name)
+                    + ") Restored state: "
+                    + str(state.as_dict())
+                )
                 self._attr_extra_state_attributes = state.attributes
                 if state.state == STATE_OFF:
                     self._attr_is_on = False
@@ -137,6 +159,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
                     self._attr_is_on = True
                 else:
                     self._attr_is_on = state.state
+        self.check_for_updated_entity_name()
 
     @property
     def should_poll(self):
@@ -181,4 +204,57 @@ class Variable(BinarySensorEntity, RestoreEntity):
         else:
             self._attr_is_on = updated_value
 
+        self.check_for_updated_entity_name()
         await self.async_update_ha_state()
+
+    def check_for_updated_entity_name(self):
+        if hasattr(self, "entity_id") and self.entity_id is not None:
+            _LOGGER.debug(
+                "("
+                + str(self._attr_name)
+                + ") Checking for Name Changes for Entity ID: "
+                + str(self.entity_id)
+            )
+            if (
+                self._hass.states.get(str(self.entity_id)) is not None
+                and self._hass.states.get(str(self.entity_id)).attributes.get(
+                    ATTR_FRIENDLY_NAME
+                )
+                is not None
+                and str(self._attr_name)
+                != self._hass.states.get(str(self.entity_id)).attributes.get(
+                    ATTR_FRIENDLY_NAME
+                )
+            ):
+                _LOGGER.debug(
+                    "("
+                    + str(self._attr_name)
+                    + ") Sensor Name Changed. Updating Name to: "
+                    + str(
+                        self._hass.states.get(str(self.entity_id)).attributes.get(
+                            ATTR_FRIENDLY_NAME
+                        )
+                    )
+                )
+                self._attr_name = self._hass.states.get(
+                    str(self.entity_id)
+                ).attributes.get(ATTR_FRIENDLY_NAME)
+                self._config.update({CONF_NAME: self.get(CONF_NAME)})
+                # self.set_attr(CONF_NAME, self.get(CONF_NAME))
+                _LOGGER.debug(
+                    "("
+                    + str(self._attr_name)
+                    + ") Updated Config Name: "
+                    + str(self._config.get(CONF_NAME, None))
+                )
+                self._hass.config_entries.async_update_entry(
+                    self._config_entry,
+                    data=self._config,
+                    options=self._config_entry.options,
+                )
+                _LOGGER.debug(
+                    "("
+                    + str(self._attr_name)
+                    + ") Updated ConfigEntry Name: "
+                    + str(self._config_entry.data.get(CONF_NAME))
+                )
