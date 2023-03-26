@@ -2,7 +2,7 @@ import logging
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA, RestoreSensor
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_FRIENDLY_NAME, CONF_ICON, CONF_NAME, Platform
+from homeassistant.const import CONF_ICON, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity import generate_entity_id
@@ -150,7 +150,6 @@ class Variable(RestoreSensor):
                 )
                 self._attr_extra_state_attributes = state.attributes
                 self._state = state.state
-        self.check_for_updated_entity_name()
 
     @property
     def should_poll(self):
@@ -190,87 +189,4 @@ class Variable(RestoreSensor):
         if updated_value is not None:
             self._attr_native_value = updated_value
 
-        self.check_for_updated_entity_name()
         await self.async_update_ha_state()
-
-    def check_for_updated_entity_name(self):
-        if hasattr(self, "entity_id") and self.entity_id is not None:
-            _LOGGER.debug(
-                "("
-                + str(self._attr_name)
-                + ") Checking for Name Changes for Entity ID: "
-                + str(self.entity_id)
-            )
-            # _LOGGER.debug(
-            #    "("
-            #    + str(self._attr_name)
-            #    + ") self._hass.states.all(): "
-            #    + str(self._hass.states.all())
-            # )
-            _LOGGER.debug(
-                "("
-                + str(self._attr_name)
-                + ") self._hass.states.get(self.entity_id): "
-                + str(self._hass.states.get(self.entity_id))
-            )
-            if self._hass.states.get(self.entity_id) is not None:
-                _LOGGER.debug(
-                    "("
-                    + str(self._attr_name)
-                    + ") self._hass.states.get(self.entity_id).attributes.get(ATTR_FRIENDLY_NAME): "
-                    + str(
-                        self._hass.states.get(self.entity_id).attributes.get(
-                            ATTR_FRIENDLY_NAME
-                        )
-                    )
-                )
-            _LOGGER.debug(
-                "("
-                + str(self._attr_name)
-                + ") self._attr_name: "
-                + str(self._attr_name)
-            )
-
-            if (
-                self._hass.states.get(str(self.entity_id)) is not None
-                and self._hass.states.get(str(self.entity_id)).attributes.get(
-                    ATTR_FRIENDLY_NAME
-                )
-                is not None
-                and self._attr_name
-                != self._hass.states.get(str(self.entity_id)).attributes.get(
-                    ATTR_FRIENDLY_NAME
-                )
-            ):
-                _LOGGER.debug(
-                    "("
-                    + str(self._attr_name)
-                    + ") Sensor Name Changed. Updating Name to: "
-                    + str(
-                        self._hass.states.get(str(self.entity_id)).attributes.get(
-                            ATTR_FRIENDLY_NAME
-                        )
-                    )
-                )
-                self._attr_name = self._hass.states.get(
-                    str(self.entity_id)
-                ).attributes.get(ATTR_FRIENDLY_NAME)
-                self._config.update({CONF_NAME: self.get(CONF_NAME)})
-                # self.set_attr(CONF_NAME, self.get(CONF_NAME))
-                _LOGGER.debug(
-                    "("
-                    + str(self._attr_name)
-                    + ") Updated Config Name: "
-                    + str(self._config.get(CONF_NAME, None))
-                )
-                self._hass.config_entries.async_update_entry(
-                    self._config_entry,
-                    data=self._config,
-                    options=self._config_entry.options,
-                )
-                _LOGGER.debug(
-                    "("
-                    + str(self._attr_name)
-                    + ") Updated ConfigEntry Name: "
-                    + str(self._config_entry.data.get(CONF_NAME))
-                )
