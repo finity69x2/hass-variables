@@ -85,7 +85,7 @@ ADD_BINARY_SENSOR_SCHEMA = vol.Schema(
 async def validate_sensor_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     """Validate the user input"""
 
-    # _LOGGER.debug("[config_flow validate_sensor_input] data: " + str(data))
+    # _LOGGER.debug(f"[config_flow validate_sensor_input] data: {data}")
     if data.get(CONF_NAME):
         return {"title": data.get(CONF_NAME)}
     else:
@@ -111,15 +111,14 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 user_input.update({CONF_ENTITY_PLATFORM: Platform.SENSOR})
                 info = await validate_sensor_input(self.hass, user_input)
-                _LOGGER.debug("[New Sensor Variable] info: " + str(info))
-                _LOGGER.debug("[New Sensor Variable] user_input: " + str(user_input))
+                _LOGGER.debug(f"[New Sensor Variable] info: {info}")
+                _LOGGER.debug(f"[New Sensor Variable] user_input: {user_input}")
                 return self.async_create_entry(
                     title=info.get("title", ""), data=user_input
                 )
             except Exception as err:
                 _LOGGER.exception(
-                    "[config_flow async_step_add_sensor] Unexpected exception:"
-                    + str(err)
+                f"[config_flow async_step_add_sensor] Unexpected exception: {err}"
                 )
                 errors["base"] = "unknown"
 
@@ -139,17 +138,14 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 user_input.update({CONF_ENTITY_PLATFORM: Platform.BINARY_SENSOR})
                 info = await validate_sensor_input(self.hass, user_input)
-                _LOGGER.debug("[New Binary Sensor Variable] info: " + str(info))
-                _LOGGER.debug(
-                    "[New Binary Sensor Variable] user_input: " + str(user_input)
-                )
+                _LOGGER.debug(f"[New Binary Sensor Variable] info: {info}")
+                _LOGGER.debug(f"[Sensor Options] updated user_input: {user_input}")
                 return self.async_create_entry(
                     title=info.get("title", ""), data=user_input
                 )
             except Exception as err:
                 _LOGGER.exception(
-                    "[config_flow async_step_add_binary_sensor] Unexpected exception:"
-                    + str(err)
+                    f"[config_flow async_step_add_binary_sensor] Unexpected exception: {err}"
                 )
                 errors["base"] = "unknown"
 
@@ -167,7 +163,7 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_import(self, import_config=None) -> FlowResult:
         """Import a config entry from configuration.yaml."""
 
-        # _LOGGER.debug("[async_step_import] import_config: " + str(import_config))
+        # _LOGGER.debug(f"[async_step_import] import_config: {import_config)}")
         return await self.async_step_add_sensor(import_config)
 
     @staticmethod
@@ -192,8 +188,8 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
 
         # _LOGGER.debug("Starting Options")
-        # _LOGGER.debug("[Options] initial config: " + str(self.config_entry.data))
-        # _LOGGER.debug("[Options] initial options: " + str(self.config_entry.options))
+        # _LOGGER.debug(f"[Options] initial config: {self.config_entry.data)}")
+        # _LOGGER.debug(f"[Options] initial options: {self.config_entry.options)}")
 
         if self.config_entry.data.get(CONF_ENTITY_PLATFORM) in PLATFORMS and (
             new_func := getattr(
@@ -212,11 +208,11 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
 
         # _LOGGER.debug("Starting Sensor Options")
         if user_input is not None:
-            _LOGGER.debug("[Sensor Options] user_input: " + str(user_input))
+            _LOGGER.debug(f"[Sensor Options] user_input: {user_input}")
 
             for m in dict(self.config_entry.data).keys():
                 user_input.setdefault(m, self.config_entry.data[m])
-            _LOGGER.debug("[Sensor Options] updated user_input: " + str(user_input))
+            _LOGGER.debug(f"[Sensor Options] updated user_input: {user_input}")
             self.config_entry.options = {}
 
             self.hass.config_entries.async_update_entry(
@@ -262,7 +258,7 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
 
         if user_input is not None:
-            _LOGGER.debug("[Binary Sensor Options] user_input: " + str(user_input))
+            _LOGGER.debug(f"[Binary Sensor Options] user_input: {user_input}")
             return self.async_create_entry(title="", data=user_input)
 
         BINARY_SENSOR_OPTIONS_SCHEMA = vol.Schema(

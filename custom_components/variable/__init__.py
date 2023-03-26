@@ -2,12 +2,18 @@
 import json
 import logging
 
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import CONF_FRIENDLY_NAME, CONF_ICON, CONF_NAME, Platform
+import voluptuous as vol
+
+from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
+from homeassistant.const import (
+    CONF_FRIENDLY_NAME,
+    CONF_ICON,
+    CONF_NAME,
+    Platform,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
-import voluptuous as vol
 
 from .const import (
     ATTR_ATTRIBUTES,
@@ -29,14 +35,13 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 try:
-    use_issue_reg = True
+    USE_ISSUE_REG = True
     from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
-except Exception as e:
+except ImportError as e:
     _LOGGER.debug(
-        "Unknown Exception trying to import issue_registry. Is HA version <2022.9?: "
-        + str(e)
+        f"Unknown Exception trying to import issue_registry. Is HA version <2022.9?: {e}"
     )
-    use_issue_reg = False
+    USE_ISSUE_REG = False
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
 SERVICE_SET_ENTITY_LEGACY = "set_entity"
@@ -87,11 +92,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             pre_state = hass.states.get(entity_id=entity_id)
             pre_attr = hass.states.get(entity_id=entity_id).attributes
             _LOGGER.debug(
-                "[async_set_variable_legacy_service] Previous state: "
-                + str(pre_state.as_dict())
+                f"[async_set_variable_legacy_service] Previous state: {pre_state.as_dict()}"
             )
             _LOGGER.debug(
-                "[async_set_variable_legacy_service] Previous attr: " + str(pre_attr)
+                f"[async_set_variable_legacy_service] Previous attr: {pre_attr}"
             )
             if not call.data.get(ATTR_REPLACE_ATTRIBUTES, False):
                 if call.data.get(ATTR_ATTRIBUTES):
@@ -101,7 +105,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             else:
                 new_attr = call.data.get(ATTR_ATTRIBUTES)
             _LOGGER.debug(
-                "[async_set_variable_legacy_service] Updated attr: " + str(new_attr)
+                f"[async_set_variable_legacy_service] Updated attr: {new_attr}"
             )
             hass.states.async_set(
                 entity_id=entity_id,
@@ -109,35 +113,35 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                 attributes=new_attr,
             )
             _LOGGER.debug(
-                "[async_set_variable_legacy_service] Post state: "
-                + str(hass.states.get(entity_id=entity_id).as_dict())
+                f"[async_set_variable_legacy_service] Post state: "
+                f"{hass.states.get(entity_id=entity_id).as_dict()}"
             )
         else:
             _LOGGER.warning(
-                "variable.set_variable Service Failed. Unknown Variable: %s", entity_id
+                f"variable.set_variable Service Failed. Unknown Variable: {entity_id}"
             )
 
     async def async_set_entity_legacy_service(call):
         """Handle calls to the set_entity legacy service."""
 
-        # _LOGGER.debug("[async_set_entity_legacy_service] call: " + str(call))
+        # _LOGGER.debug(f"[async_set_entity_legacy_service] call: {call}")
 
         entity_id: str = call.data.get(ATTR_ENTITY)
-        # _LOGGER.debug("[async_set_entity_legacy_service] entity_id: " + str(entity_id))
+        # _LOGGER.debug(f"[async_set_entity_legacy_service] entity_id: {entity_id}")
         entity_registry = er.async_get(hass)
         entity = entity_registry.async_get(entity_id)
 
-        # _LOGGER.debug("[async_set_entity_legacy_service] entity: " + str(entity))
+        # _LOGGER.debug(f"[async_set_entity_legacy_service] entity: {entity}")
         if entity and entity.platform == DOMAIN:
             _LOGGER.debug("[async_set_entity_legacy_service] Updating variable")
             pre_state = hass.states.get(entity_id=entity_id)
             pre_attr = hass.states.get(entity_id=entity_id).attributes
             _LOGGER.debug(
-                "[async_set_entity_legacy_service] Previous state: "
-                + str(pre_state.as_dict())
+                f"[async_set_entity_legacy_service] Previous state: "
+                f"{pre_state.as_dict()}"
             )
             _LOGGER.debug(
-                "[async_set_entity_legacy_service] Previous attr: " + str(pre_attr)
+                f"[async_set_entity_legacy_service] Previous attr: {pre_attr}"
             )
             if not call.data.get(ATTR_REPLACE_ATTRIBUTES, False):
                 if call.data.get(ATTR_ATTRIBUTES):
@@ -147,7 +151,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             else:
                 new_attr = call.data.get(ATTR_ATTRIBUTES)
             _LOGGER.debug(
-                "[async_set_entity_legacy_service] Updated attr: " + str(new_attr)
+                f"[async_set_entity_legacy_service] Updated attr: {new_attr}"
             )
             hass.states.async_set(
                 entity_id=entity_id,
@@ -155,12 +159,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                 attributes=new_attr,
             )
             _LOGGER.debug(
-                "[async_set_entity_legacy_service] Post state: "
-                + str(hass.states.get(entity_id=entity_id).as_dict())
+                f"[async_set_entity_legacy_service] Post state: "
+                f"{hass.states.get(entity_id=entity_id).as_dict()}"
             )
         else:
             _LOGGER.warning(
-                "variable.set_entity Service Failed. Unknown Variable: %s", entity_id
+                f"variable.set_entity Service Failed. Unknown Variable: {entity_id}"
             )
 
     hass.services.async_register(
@@ -179,7 +183,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
 
     variables = json.loads(json.dumps(config.get(DOMAIN, {})))
 
-    if variables and use_issue_reg:
+    if variables and USE_ISSUE_REG:
         async_create_issue(
             hass,
             DOMAIN,
@@ -194,8 +198,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             entry.data.get(CONF_VARIABLE_ID)
             for entry in hass.config_entries.async_entries(DOMAIN)
         }:
-            _LOGGER.warning("[YAML Import] New YAML sensor, importing: " + str(var))
-            _LOGGER.debug("[YAML Import] var_fields: " + str(var_fields))
+            _LOGGER.warning(f"[YAML Import] New YAML sensor, importing: {var}")
+            _LOGGER.debug(f"[YAML Import] var_fields: {var_fields}")
 
             for key_empty, var_empty in var_fields.items():
                 if var_empty is None:
@@ -223,7 +227,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                 )
             )
         else:
-            _LOGGER.info("[YAML Import] Already Imported: " + str(var))
+            _LOGGER.info(f"[YAML Import] Already Imported: {var}")
 
     return True
 
@@ -232,7 +236,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from a config entry."""
 
     entry.options = {}
-    _LOGGER.debug("[init async_setup_entry] entry: " + str(entry.data))
+    _LOGGER.debug(f"[init async_setup_entry] entry: {entry.data}")
     hass.data.setdefault(DOMAIN, {})
     hass_data = dict(entry.data)
     hass.data[DOMAIN][entry.entry_id] = hass_data
@@ -246,7 +250,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
 
-    _LOGGER.info("Unloading: " + str(entry.data))
+    _LOGGER.info(f"Unloading: {entry.data}")
     hass_data = dict(entry.data)
     if hass_data.get(CONF_ENTITY_PLATFORM) in PLATFORMS:
         unload_ok = await hass.config_entries.async_unload_platforms(
@@ -261,5 +265,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 # async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
 #    """Handle options update."""
 #
-#    _LOGGER.debug("[init update_listener] entry: " + str(entry.as_dict()))
+#    _LOGGER.debug(f"[init update_listener] entry: {entry.as_dict()}")
 #    await hass.config_entries.async_reload(entry.entry_id)

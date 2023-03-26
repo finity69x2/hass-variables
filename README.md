@@ -148,7 +148,8 @@ action:
 action:
   - service: variable.update_sensor
     data:
-      value: "livingroom"
+      value: >-
+        {{trigger.to_state.name|replace('Motion Sensor','')}}
       attributes:
         history_1: "{{states('sensor.last_motion')}}"
         history_2: "{{state_attr('sensor.last_motion','history_1')}}"

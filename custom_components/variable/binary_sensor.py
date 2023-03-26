@@ -71,9 +71,9 @@ async def async_setup_entry(
 
     config = hass.data.get(DOMAIN).get(config_entry.entry_id)
     unique_id = config_entry.entry_id
-    # _LOGGER.debug("[async_setup_entry] config_entry: " + str(config_entry.as_dict()))
-    # _LOGGER.debug("[async_setup_entry] config: " + str(config))
-    # _LOGGER.debug("[async_setup_entry] unique_id: " + str(unique_id))
+    # _LOGGER.debug(f"[async_setup_entry] config_entry: {config_entry.as_dict()}")
+    # _LOGGER.debug(f"[async_setup_entry] config: {config}")
+    # _LOGGER.debug(f"[async_setup_entry] unique_id: {unique_id}")
 
     async_add_entities([Variable(hass, config, config_entry, unique_id)])
 
@@ -92,10 +92,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
     ):
         """Initialize a Binary Sensor Variable."""
         _LOGGER.debug(
-            "("
-            + str(config.get(CONF_NAME, config.get(CONF_VARIABLE_ID)))
-            + ") [init] config: "
-            + str(config)
+            f"({config.get(CONF_NAME, config.get(CONF_VARIABLE_ID))}) [init] config: {config}"
         )
         if config.get(CONF_VALUE):
             if config.get(CONF_VALUE).lower() in ["true", "1", "t", "y", "yes", "on"]:
@@ -122,28 +119,25 @@ class Variable(BinarySensorEntity, RestoreEntity):
         self.entity_id = generate_entity_id(
             ENTITY_ID_FORMAT, self._variable_id, hass=self._hass
         )
-        # _LOGGER.debug("[init] name: " + str(self._attr_name))
-        # _LOGGER.debug("[init] variable_id: " + str(self._variable_id))
-        # _LOGGER.debug("[init] entity_id: " + str(self.entity_id))
-        # _LOGGER.debug("[init] unique_id: " + str(self._attr_unique_id))
-        # _LOGGER.debug("[init] icon: " + str(self._attr_icon))
-        # _LOGGER.debug("[init] value: " + str(self._attr_is_on))
-        # _LOGGER.debug("[init] attributes: " + str(self._attr_extra_state_attributes))
-        # _LOGGER.debug("[init] restore: " + str(self._restore))
-        # _LOGGER.debug("[init] force_update: " + str(self._force_update))
+        # _LOGGER.debug(f"[init] name: {self._attr_name}")
+        # _LOGGER.debug(f"[init] variable_id: {self._variable_id}")
+        # _LOGGER.debug(f"[init] entity_id: {self.entity_id}")
+        # _LOGGER.debug(f"[init] unique_id: {self._attr_unique_id}")
+        # _LOGGER.debug(f"[init] icon: {self._attr_icon}")
+        # _LOGGER.debug(f"[init] value: {self._attr_is_on}")
+        # _LOGGER.debug(f"[init] attributes: {self._attr_extra_state_attributes}")
+        # _LOGGER.debug(f"[init] restore: {self._restore}")
+        # _LOGGER.debug(f"[init] force_update: {self._force_update}")
 
     async def async_added_to_hass(self):
         """Run when entity about to be added."""
         await super().async_added_to_hass()
         if self._restore is True:
-            _LOGGER.info("(" + str(self._attr_name) + ") Restoring after Reboot")
+            _LOGGER.info(f"({self._attr_name}) Restoring after Reboot")
             state = await self.async_get_last_state()
             if state:
                 _LOGGER.debug(
-                    "("
-                    + str(self._attr_name)
-                    + ") Restored state: "
-                    + str(state.as_dict())
+                f"({self._attr_name}) Restored state: {state.as_dict()}"
                 )
                 self._attr_extra_state_attributes = state.attributes
                 if state.state == STATE_OFF:
@@ -172,8 +166,8 @@ class Variable(BinarySensorEntity, RestoreEntity):
         """Update Binary Sensor Variable."""
 
         # _LOGGER.debug("Starting async_update_variable")
-        # _LOGGER.debug("value: " + str(value))
-        # _LOGGER.debug("attributes: " + str(attributes))
+        # _LOGGER.debug(f"value: {value}")
+        # _LOGGER.debug(f"attributes: {attributes}")
         updated_attributes = None
         updated_value = None
 

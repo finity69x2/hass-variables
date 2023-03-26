@@ -33,7 +33,7 @@ class RestartRequiredFixFlow(RepairsFlow):
     ) -> data_entry_flow.FlowResult:
         """Handle the confirm step of a fix flow."""
         if user_input is not None:
-            _LOGGER.debug("[async_step_confirm_restart] user_input: " + str(user_input))
+            _LOGGER.debug(f"[async_step_confirm_restart] user_input: {user_input}")
             await self.hass.services.async_call("homeassistant", "restart")
             return self.async_create_entry(title="", data={})
 
@@ -46,13 +46,13 @@ class RestartRequiredFixFlow(RepairsFlow):
 async def async_create_fix_flow(
     hass: HomeAssistant,
     issue_id: str,
-    data: dict[str, str | int | float | None] | None = None,
     *args: Any,
+    data: dict[str, str | int | float | None] | None = None,
     **kwargs: Any,
 ) -> RepairsFlow | None:
     """Create flow."""
-    _LOGGER.debug("[async_create_fix_flow] issue_id: " + str(issue_id))
-    _LOGGER.debug("[async_create_fix_flow] data: " + str(data))
+    _LOGGER.debug(f"[async_create_fix_flow] issue_id: {issue_id}")
+    _LOGGER.debug(f"[async_create_fix_flow] data: {data}")
     if issue_id.startswith("restart_required"):
         return RestartRequiredFixFlow(issue_id)
     return None
