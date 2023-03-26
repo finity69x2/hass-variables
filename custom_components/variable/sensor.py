@@ -149,7 +149,25 @@ class Variable(RestoreSensor):
                     + str(state.as_dict())
                 )
                 self._attr_extra_state_attributes = state.attributes
-                self._state = state.state
+
+                # Unsure how to deal with state vs native_value on restore.
+                # Setting Restored state to override native_value for now.
+                # self._state = state.state
+                if state and (sensor.native_value != state.state):
+                    _LOGGER.info(
+                        "("
+                        + str(self._attr_name)
+                        + ") Restored values are different. native_value: "
+                        + str(sensor.native_value)
+                        + " | state: "
+                        + str(state.state)
+                    )
+                if state.state is not None and state.state.lower() not in [
+                    "unknown",
+                    "unavailable",
+                    "none",
+                ]:
+                    self._attr_native_value = state.state
 
     @property
     def should_poll(self):
