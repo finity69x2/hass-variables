@@ -2,18 +2,12 @@
 import json
 import logging
 
-import voluptuous as vol
-
-from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
-from homeassistant.const import (
-    CONF_FRIENDLY_NAME,
-    CONF_ICON,
-    CONF_NAME,
-    Platform,
-)
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.const import CONF_FRIENDLY_NAME, CONF_ICON, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
+import voluptuous as vol
 
 from .const import (
     ATTR_ATTRIBUTES,
@@ -34,14 +28,14 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-try:
-    USE_ISSUE_REG = True
-    from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
-except ImportError as e:
-    _LOGGER.debug(
-        f"Unknown Exception trying to import issue_registry. Is HA version <2022.9?: {e}"
-    )
-    USE_ISSUE_REG = False
+# try:
+#    USE_ISSUE_REG = True
+#    from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
+# except ImportError as e:
+#    _LOGGER.debug(
+#        f"Unknown Exception trying to import issue_registry. Is HA version <2022.9?: {e}"
+#    )
+#    USE_ISSUE_REG = False
 
 SERVICE_SET_VARIABLE_LEGACY = "set_variable"
 SERVICE_SET_ENTITY_LEGACY = "set_entity"
@@ -150,9 +144,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
                     new_attr = pre_attr
             else:
                 new_attr = call.data.get(ATTR_ATTRIBUTES)
-            _LOGGER.debug(
-                f"[async_set_entity_legacy_service] Updated attr: {new_attr}"
-            )
+            _LOGGER.debug(f"[async_set_entity_legacy_service] Updated attr: {new_attr}")
             hass.states.async_set(
                 entity_id=entity_id,
                 new_state=call.data.get(ATTR_VALUE),
@@ -183,22 +175,22 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
 
     variables = json.loads(json.dumps(config.get(DOMAIN, {})))
 
-    if variables and USE_ISSUE_REG:
-        async_create_issue(
-            hass,
-            DOMAIN,
-            "restart_required_variable",
-            is_fixable=True,
-            severity=IssueSeverity.WARNING,
-            translation_key="restart_required_variable",
-        )
+    # if variables and USE_ISSUE_REG:
+    #    async_create_issue(
+    #        hass,
+    #        DOMAIN,
+    #        "restart_required_variable",
+    #        is_fixable=True,
+    #        severity=IssueSeverity.WARNING,
+    #        translation_key="restart_required_variable",
+    #    )
 
     for var, var_fields in variables.items():
         if var is not None and var not in {
             entry.data.get(CONF_VARIABLE_ID)
             for entry in hass.config_entries.async_entries(DOMAIN)
         }:
-            _LOGGER.warning(f"[YAML Import] New YAML sensor, importing: {var}")
+            _LOGGER.info(f"[YAML Import] YAML sensor, importing: {var}")
             _LOGGER.debug(f"[YAML Import] var_fields: {var_fields}")
 
             for key_empty, var_empty in var_fields.items():

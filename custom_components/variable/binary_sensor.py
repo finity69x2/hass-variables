@@ -19,6 +19,7 @@ from .const import (
     CONF_RESTORE,
     CONF_VALUE,
     CONF_VARIABLE_ID,
+    CONF_YAML_VARIABLE,
     DEFAULT_FORCE_UPDATE,
     DEFAULT_ICON,
     DEFAULT_REPLACE_ATTRIBUTES,
@@ -116,6 +117,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
         self._attr_extra_state_attributes = config.get(CONF_ATTRIBUTES)
         self._restore = config.get(CONF_RESTORE)
         self._force_update = config.get(CONF_FORCE_UPDATE)
+        self._yaml_variable = config.get(CONF_YAML_VARIABLE)
         self.entity_id = generate_entity_id(
             ENTITY_ID_FORMAT, self._variable_id, hass=self._hass
         )
@@ -136,9 +138,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
             _LOGGER.info(f"({self._attr_name}) Restoring after Reboot")
             state = await self.async_get_last_state()
             if state:
-                _LOGGER.debug(
-                    f"({self._attr_name}) Restored state: {state.as_dict()}"
-                )
+                _LOGGER.debug(f"({self._attr_name}) Restored state: {state.as_dict()}")
                 self._attr_extra_state_attributes = state.attributes
                 if state.state == STATE_OFF:
                     self._attr_is_on = False

@@ -57,6 +57,9 @@
           "force_update": "Force Update"
         },
         "description": "Update existing Variable Binary Sensor"
+      },
+      "abort": {
+        "yaml_variable": "Cannot change options here for Variables created by YAML.\n\nTo use the User Interface to manage this Variable, you will need to remove it from YAML and manually recreate it in Home Assistant, Integrations, Add Integration."
       }
     }
   },
