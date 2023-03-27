@@ -1,7 +1,5 @@
 import logging
 
-import voluptuous as vol
-
 from homeassistant.components.sensor import PLATFORM_SCHEMA, RestoreSensor
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ICON, CONF_NAME, Platform
@@ -9,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity import generate_entity_id
 from homeassistant.util import slugify
-
+import voluptuous as vol
 
 from .const import (
     ATTR_ATTRIBUTES,
@@ -138,25 +136,25 @@ class Variable(RestoreSensor):
                 self._attr_native_value = sensor.native_value
             state = await self.async_get_last_state()
             if state:
-                _LOGGER.debug(
-                    f"({self._attr_name}) Restored state: {state.as_dict()}"
-                )
+                _LOGGER.debug(f"({self._attr_name}) Restored state: {state.as_dict()}")
                 self._attr_extra_state_attributes = state.attributes
 
                 # Unsure how to deal with state vs native_value on restore.
                 # Setting Restored state to override native_value for now.
                 # self._state = state.state
-                if state and (sensor.native_value != state.state):
-                    _LOGGER.info(
-                        f"({self._attr_name}) Restored values are different. "
-                        f"native_value: {sensor.native_value} | state: {state.state}"
-                    )
-                if state.state is not None and state.state.lower() not in [
-                    "unknown",
-                    "unavailable",
-                    "none",
-                ]:
-                    self._attr_native_value = state.state
+                if sensor:
+                    if (
+                        state.state is not None
+                        and state.state.lower() != "none"
+                        and sensor.native_value != state.state
+                    ):
+                        _LOGGER.info(
+                            f"({self._attr_name}) Restored values are different. "
+                            f"native_value: {sensor.native_value} | state: {state.state}"
+                        )
+                        self._attr_native_value = state.state
+                else:
+                    self._state = state.state
 
     @property
     def should_poll(self):
