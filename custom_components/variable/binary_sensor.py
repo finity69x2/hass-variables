@@ -136,9 +136,7 @@ class Variable(BinarySensorEntity, RestoreEntity):
             _LOGGER.info(f"({self._attr_name}) Restoring after Reboot")
             state = await self.async_get_last_state()
             if state:
-                _LOGGER.debug(
-                    f"({self._attr_name}) Restored state: {state.as_dict()}"
-                )
+                _LOGGER.debug(f"({self._attr_name}) Restored state: {state.as_dict()}")
                 self._attr_extra_state_attributes = state.attributes
                 if state.state == STATE_OFF:
                     self._attr_is_on = False
@@ -171,7 +169,11 @@ class Variable(BinarySensorEntity, RestoreEntity):
         updated_attributes = None
         updated_value = None
 
-        if not replace_attributes and self._attr_extra_state_attributes is not None:
+        if (
+            not replace_attributes
+            and hasattr(self, "_attr_extra_state_attributes")
+            and self._attr_extra_state_attributes is not None
+        ):
             updated_attributes = dict(self._attr_extra_state_attributes)
 
         if attributes is not None:
