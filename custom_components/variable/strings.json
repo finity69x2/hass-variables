@@ -60,7 +60,7 @@
       }
     },
     "abort": {
-      "yaml_variable": "Cannot change options here for Variables created by YAML.\n\nTo use the User Interface to manage this Variable, you will need to remove it from YAML and manually recreate it in Home Assistant, Integrations, Add Integration."
+      "yaml_variable": "Cannot change options here for Variables created by YAML.\n\nTo use the User Interface to manage this Variable, you will need to:\n1. Remove it from YAML\n2. Delete the imported Variable entity from Home Assistant\n3. Restart Home Assistant\n4. Manually recreate it in Home Assistant, Integrations, +Add Integration."
     }
   },
   "issues": {
