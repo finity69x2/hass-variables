@@ -186,11 +186,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
     #    )
 
     for var, var_fields in variables.items():
-        if var is not None and var not in {
-            entry.data.get(CONF_VARIABLE_ID)
-            for entry in hass.config_entries.async_entries(DOMAIN)
-        }:
-            _LOGGER.info(f"[YAML Import] YAML sensor, importing: {var}")
+        # if var is not None and var not in {
+        #    entry.data.get(CONF_VARIABLE_ID)
+        #    for entry in hass.config_entries.async_entries(DOMAIN)
+        # }:
+        if var is not None:
+            _LOGGER.debug(f"[YAML Import] YAML sensor: {var}")
             _LOGGER.debug(f"[YAML Import] var_fields: {var_fields}")
 
             for key_empty, var_empty in var_fields.items():
@@ -202,24 +203,62 @@ async def async_setup(hass: HomeAssistant, config: ConfigType):
             name = var_fields.get(CONF_NAME, attr.pop(CONF_FRIENDLY_NAME, None))
             attr.pop(CONF_FRIENDLY_NAME, None)
 
-            hass.async_create_task(
-                hass.config_entries.flow.async_init(
-                    DOMAIN,
-                    context={"source": SOURCE_IMPORT},
-                    data={
-                        CONF_ENTITY_PLATFORM: Platform.SENSOR,
-                        CONF_VARIABLE_ID: var,
-                        CONF_NAME: name,
-                        CONF_VALUE: var_fields.get(CONF_VALUE),
-                        CONF_RESTORE: var_fields.get(CONF_RESTORE),
-                        CONF_FORCE_UPDATE: var_fields.get(CONF_FORCE_UPDATE),
-                        CONF_ATTRIBUTES: attr,
-                        CONF_ICON: icon,
-                    },
+            if var not in {
+                entry.data.get(CONF_VARIABLE_ID)
+                for entry in hass.config_entries.async_entries(DOMAIN)
+            }:
+                _LOGGER.debug(f"[YAML Import] Creating New Sensor Variable: {var}")
+                hass.async_create_task(
+                    hass.config_entries.flow.async_init(
+                        DOMAIN,
+                        context={"source": SOURCE_IMPORT},
+                        data={
+                            CONF_ENTITY_PLATFORM: Platform.SENSOR,
+                            CONF_VARIABLE_ID: var,
+                            CONF_NAME: name,
+                            CONF_VALUE: var_fields.get(CONF_VALUE),
+                            CONF_RESTORE: var_fields.get(CONF_RESTORE),
+                            CONF_FORCE_UPDATE: var_fields.get(CONF_FORCE_UPDATE),
+                            CONF_ATTRIBUTES: attr,
+                            CONF_ICON: icon,
+                        },
+                    )
                 )
-            )
-        else:
-            _LOGGER.info(f"[YAML Import] Already Imported: {var}")
+            else:
+                _LOGGER.debug(f"[YAML Import] Updating Existing Sensor Variable: {var}")
+                # .options.async_create_flow(entry.entry_id, context={"source": SOURCE_IMPORT}, data=None)
+
+                # async def async_create_flow(
+                #    self,
+                #    handler_key: str,
+                #    *,
+                #    context: dict[str, Any] | None = None,
+                #    data: dict[str, Any] | None = None,
+                # )
+
+                entry_id = None
+                for entry in hass.config_entries.async_entries(DOMAIN):
+                    if var == entry.data.get(CONF_VARIABLE_ID):
+                        entry_id = entry.entry_id
+                        break
+                # handler_key=entry_id
+                _LOGGER.debug(f"[YAML Import] entry_id: {entry_id}")
+                _LOGGER.debug(f"[YAML Import] entry: {entry.as_dict()}")
+                # hass.config_entries.options.async_create_flow(
+                hass.async_create_task(
+                    hass.config_entries.options.async_create_flow(
+                        handler_key=entry_id,
+                        context={"source": SOURCE_IMPORT},
+                        data={
+                            CONF_NAME: name,
+                            CONF_VALUE: var_fields.get(CONF_VALUE),
+                            CONF_RESTORE: var_fields.get(CONF_RESTORE),
+                            CONF_FORCE_UPDATE: var_fields.get(CONF_FORCE_UPDATE),
+                            CONF_ATTRIBUTES: attr,
+                            CONF_ICON: icon,
+                        },
+                    )
+                )
 
     return True
 
