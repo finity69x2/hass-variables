@@ -187,9 +187,9 @@ class VariableConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class VariableOptionsFlowHandler(config_entries.OptionsFlow):
     """Options for the component."""
 
-    # def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-    #    """Init object."""
-    #    self.config_entry = config_entry
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Init object."""
+        self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -219,7 +219,6 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input=None, errors=None
     ) -> FlowResult:
 
-        # _LOGGER.debug("Starting Sensor Options")
         if user_input is not None:
             _LOGGER.debug(f"[Sensor Options] user_input: {user_input}")
 
@@ -313,34 +312,4 @@ class VariableOptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_NAME, self.config_entry.data.get(CONF_VARIABLE_ID)
                 ),
             },
-        )
-
-    async def async_step_yaml_update_sensor(
-        self, user_input=None, yaml_variable=True
-    ) -> FlowResult:
-        _LOGGER.debug("Starting YAML Update Sensor")
-        if user_input is not None:
-            _LOGGER.debug(f"[YAML Import Update] user_input: {user_input}")
-
-            user_input.update({CONF_YAML_VARIABLE: yaml_variable})
-            for m in dict(self.config_entry.data).keys():
-                user_input.setdefault(m, self.config_entry.data[m])
-            _LOGGER.debug(f"[YAML Import Update] updated user_input: {user_input}")
-            self.config_entry.options = {}
-
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, data=user_input, options=self.config_entry.options
-            )
-            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
-            return self.async_create_entry(title="", data=user_input)
-
-        _LOGGER.error(f"Unable to update YAML Variable: {user_input}")
-        return self.async_abort(reason="yaml_update_error")
-
-    async def async_step_import(self, import_config=None) -> FlowResult:
-        """Update a config entry from configuration.yaml."""
-
-        _LOGGER.debug(f"[Options async_step_import] import_config: {import_config}")
-        return await self.async_step_yaml_update_sensor(
-            user_input=import_config, yaml_variable=True
         )
