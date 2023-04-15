@@ -1,4 +1,8 @@
-# Create a sensor variable with the Variable ID of `test_counter` and Initial Value of `0`
+variable:
+  test_counter:
+    value: 0
+    attributes:
+      icon: mdi:alarm
 
 automation:
   - alias: test_counter
@@ -7,9 +11,8 @@ automation:
       - platform: time
         seconds: '/1'
     action:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: test_counter
           value: >
-            {{ (states('sensor.test_counter') | int(default=0)) + 1 }}
-        target:
-          entity_id: sensor.test_counter
+            {{ (variable.state | int(default=0)) + 1 }}
