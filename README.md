@@ -11,15 +11,6 @@ Since rogro82 seems to have abandoned his repository and his custom_component is
 
 Copy `variable` folder in to your home-assistant `custom_components` folder
 
-### Automatically with HACS
-
-This card is available in [HACS](https://github.com/custom-components/hacs) (Home Assistant Community Store)
-
-1. In the HACS store click on Integrations and then click on the plus in the right bottom corner. Search for hass-variables click on it and then click on INSTALL THIS REPOSITORY IN HACS.
-2. Restart Home Assistant.
-
-Then the `variable` custom component will be installable through HACS and you will be able to follow the future updates.
-
 ## Configure
 
 Add the component `variable` to your configuration and declare the variables you want.
