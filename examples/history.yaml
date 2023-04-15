@@ -1,18 +1,20 @@
-# Create a sensor variable with the Variable ID of `last_motion`, and Initial Value of `unknown`, and Restore on Restart of `True`
+variable:
+  last_motion:
+    value: 'unknown'
+    restore: true
 
 script:
   update_last_motion:
     sequence:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: last_motion
+          attributes:
+              history_1: "{{states('variable.last_motion')}}"
+              history_2: "{{state_attr('variable.last_motion','history_1')}}"
+              history_3: "{{state_attr('variable.last_motion','history_2')}}"
           value: >
             {{ location }}
-          attributes:
-            history_1: "{{states('sensor.last_motion')}}"
-            history_2: "{{state_attr('sensor.last_motion','history_1')}}"
-            history_3: "{{state_attr('sensor.last_motion','history_2')}}"
-        target:
-          entity_id: sensor.last_motion
 
   update_motion_hall:
     sequence:
@@ -37,3 +39,4 @@ script:
       - service: script.update_last_motion
         data:
           location: 'bedroom'
+
