@@ -1,187 +1,138 @@
-# Variables+History
-### aka. `variable`
 
-<picture>
-  <img alt="Variable Logo" src="https://github.com/Wibias/hass-variables/raw/master/logo/icon.png">
-</picture>
+# hass-variables
 
-A Home Assistant Integration to declare and set/update variables.
+A Home Assistant component to declare and set/update variables (state).
 
-Forked and updated from initial integration developed by [rogro82](https://github.com/rogro82)
+Since rogro82 seems to have abandoned his repository and his custom_component is really useful I just forked it and updated it so it's still works with ^2022.8.0!
 
-## Installation
+## Install
 
-### HACS *(recommended)*
-1. Ensure that [HACS](https://hacs.xyz/) is installed
-1. [Click Here](https://my.home-assistant.io/redirect/hacs_repository/?owner=Wibias&repository=hass-variables) to directly open `Variables+History` in HACS **or**<br/>
-  a. Navigate to HACS<br/>
-  b. Click `+ Explore & Download Repositories`<br/>
-  c. Find the `Variables+History` integration <br/>
-1. Click `Download`
-1. Restart Home Assistant
-1. See [Configuration](#configuration) below
+### Manually
 
-<details>
-<summary><h3>Manual</h3></summary>
+Copy `variable` folder in to your home-assistant `custom_components` folder
 
-You probably **do not** want to do this! Use the HACS method above unless you know what you are doing and have a good reason as to why you are installing manually
+### Automatically with HACS
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`)
-1. If you do not have a `custom_components` directory there, you need to create it
-1. In the `custom_components` directory create a new folder called `variable`
-1. Download _all_ the files from the `custom_components/variable/` directory in this repository
-1. Place the files you downloaded in the new directory you created
-1. Restart Home Assistant
-1. See [Configuration](#configuration) below
-</details>
+This card is available in [HACS](https://github.com/custom-components/hacs) (Home Assistant Community Store)
 
-## Configuration
-**Configuration is done in the Integrations section of Home Assistant. Configuration with configuration.yaml is no longer supported.**
-1. [Click Here](https://my.home-assistant.io/redirect/config_flow_start/?domain=variable) to directly add a `Variables+History` sensor **or**<br/>
-  a. In Home Assistant, go to Settings -> [Integrations](https://my.home-assistant.io/redirect/integrations/)<br/>
-  b. Click `+ Add Integrations` and select `Variables+History`<br/>
-1. Add your configuration ([see Configuration Options below](#configuration-options))
-1. Click `Submit`
-* Repeat as needed to create additional `Variables+History` sensors
-* Options can be changed for existing `Variables+History` sensors in Home Assistant Integrations by selecting `Configure` under the desired `Variables+History` sensor.
+1. In the HACS store click on Integrations and then click on the plus in the right bottom corner. Search for hass-variables click on it and then click on INSTALL THIS REPOSITORY IN HACS.
+2. Restart Home Assistant.
 
-## Configuration Options
+Then the `variable` custom component will be installable through HACS and you will be able to follow the future updates.
 
-### First choose the `variable` type.
+## Configure
 
-<details>
-<summary><h3>Sensor</h3></summary>
+Add the component `variable` to your configuration and declare the variables you want.
 
-Name | Required | Default | Description |
--- | -- | -- | --
-`Variable ID` | `Yes` | | The desired id of the new sensor (ex. `test_variable` would create an entity_id of `sensor.test_variable`)
-`Name` | `No` | | Friendly name of the variable sensor
-`Icon` | `No` | `mdi:variable` | Icon of the Variable
-`Initial Value` | `No` | | Initial value/state of the variable. If `Restore on Restart` is `False`, the variable will reset to this value on every restart
-`Initial Attributes` | `No` | | Initial attributes of the variable. If `Restore on Restart` is `False`, the variable will reset to this value on every restart
-`Restore on Restart` | `No` | `True` | If `True` will restore previous value on restart. If `False`, will reset to `Initial Value` and `Initial Attributes` on restart
-`Force Update` | `No` | `False` | Variable's `last_updated` time will change with any service calls to update the variable even if the value does not change
+### Example configuration
 
-</details>
+```yaml
+variable:
+  countdown_timer:
+    value: 30
+    attributes:
+      friendly_name: 'Countdown'
+      icon: mdi:alarm
+  countdown_trigger:
+    name: Countdown
+    value: False
+  light_scene:
+    value: 'normal'
+    attributes:
+      previous: ''
+    restore: true
+  current_power_usage:
+    force_update: true
 
-<details>
-<summary><h3>Binary Sensor</h3></summary>
+  daily_download:
+    value: 0
+    restore: true
+    domain: sensor
+    attributes:
+      state_class: measurement
+      unit_of_measurement: GB
+      icon: mdi:download
+```
 
-Name | Required | Default | Description |
--- | -- | -- | --
-`Variable ID` | `Yes` | | The desired id of the new binary sensor (ex. `test_variable` would create an entity_id of `binary_sensor.test_variable`)
-`Name` | `No` | | Friendly name of the variable binary sensor
-`Icon` | `No` | `mdi:variable` | Icon of the Variable
-`Initial Value` | `No` | `False` | Initial `True`/`False` value/state of the variable. If `Restore on Restart` is `False`, the variable will reset to this value on every restart
-`Initial Attributes` | `No` | | Initial attributes of the variable. If `Restore on Restart` is `False`, the variable will reset to this value on every restart
-`Restore on Restart` | `No` | `True` | If `True` will restore previous value on restart. If `False`, will reset to `Initial Value` and `Initial Attributes` on restart
-`Force Update` | `No` | `False` | Variable's `last_updated` time will change with any service calls to update the variable even if the value does not change
+A variable 'should' have a __value__ and can optionally have a __name__ and __attributes__, which can be used to specify additional values but can also be used to set internal attributes like icon, friendly_name etc.
 
-</details>
+A variable can accept an optional `domain` which results in the entity name to start with that domain instead of `variable`.
 
-## Services
+In case you want your variable to restore its value and attributes after restarting you can set __restore__ to true.
 
-There are instructions and selectors when the service is called from the Developer Tools or within a Script or Automation.
+In case you want your variable to update (and add a history entry) even if the value has not changed, you can set __force_update__ to true.
 
-### `variable.update_sensor`
+## Set variables from automations
 
-Used to update the value or attributes of a Sensor Variable
+The variable component exposes 2 services:
+* `variable.set_variable` can be used to update a variables value and/or its attributes.
+* `variable.set_entity` can be used to update an entity value and/or its attributes.
 
-Name | Key | Required | Default | Description |
--- | -- | -- | -- | -- |
-`Targets` | `target:`<br />&nbsp;&nbsp;`entity_id:`  | `Yes` | | The entity_ids of one or more sensor variables to update (ex. `sensor.test_variable`)
-`New Value` | `value` | `No` | | Value/state to change the variable to
-`New Attributes` | `attributes` | `No` | | What to update the attributes to
-`Replace Attributes` | `replace_attributes` | `No` | `False` | Replace or merge current attributes (`False` = merge)
+The following parameters can be used with `variable.set_variable`:
+
+- __variable: string (required)__
+The name of the variable to update
+- __value: any (optional)__
+New value to set
+- __attributes: dictionary (optional)__
+Attributes to set or update
+- __replace_attributes: boolean ( optional )__
+Replace or merge current attributes (default false = merge)
 
 
-### `variable.update_binary_sensor`
+The following parameters can be used with `variable.set_entity`:
 
-Used to update the value or attributes of a Binary Sensor Variable
+- __entity: string (required)__
+The id of the entity to update
+- __value: any (optional)__
+New value to set
+- __attributes: dictionary (optional)__
+Attributes to set or update
+- __replace_attributes: boolean ( optional )__
+Replace or merge current attributes (default false = merge)
 
-Name | Key | Required | Default | Description |
--- | -- | -- | -- | -- |
-`Targets` | `target:`<br />&nbsp;&nbsp;`entity_id:`  | `Yes` | | The entity_ids of one or more binary sensor variables to update (ex. `binary_sensor.test_variable`)
-`New Value` | `value` | `No` | | Value/state to change the variable to
-`New Attributes` | `attributes` | `No` | | What to update the attributes to
-`Replace Attributes` | `replace_attributes` | `No` | `False` | Replace or merge current attributes (`False` = merge)
-
-<details>
-<summary><h2>Legacy Services</h2></summary>
-
-#### These will only work for Sensor Variables
-_These services are from the previous version of the integration and are being kept for pre-existing automations and scripts. In general, the new `variable.update_` services above should be used going forward._
-
-Both services are similar and used to update the value or attributes of a Sensor Variable. `variable.set_variable` uses just the `variable_id` and `variable.set_entity` uses the full `entity_id`. There are instructions and selectors when the service is called from the Developer Tools or within a Script or Automation.
-
-### `variable.set_variable`
-
-Name | Key | Required | Default | Description |
--- | -- | -- | -- | -- |
-`Variable ID` | `variable`  | `Yes` | | The id of the sensor variable to update (ex. `test_variable` for a sensor variable of `sensor.test_variable`)
-`Value` | `value` | `No` | | Value/state to change the variable to
-`Attributes` | `attributes` | `No` | | What to update the attributes to
-`Replace Attributes` | `replace_attributes` | `No` | `False` | Replace or merge current attributes (`False` = merge)
-
-### `variable.set_entity`
-
-Name | Key | Required | Default | Description |
--- | -- | -- | -- | -- |
-`Entity ID` | `entity`  | `Yes` | | The entity_id of the sensor variable to update (ex. `sensor.test_variable`)
-`Value` | `value` | `No` | | Value/state to change the variable to
-`Attributes` | `attributes` | `No` | | What to update the attributes to
-`Replace Attributes` | `replace_attributes` | `No` | `False` | Replace or merge current attributes (`False` = merge)
-
-</details>
-
-## Example service calls
+#### Example service calls
 
 ```yaml
 action:
-  - service: variable.update_sensor
+  - service: variable.set_variable
     data:
+      variable: test_timer
       value: 30
-    target:
-      entity_id: sensor.test_timer
-```
-```yaml
+
 action:
-  - service: variable.update_sensor
+  - service: variable.set_variable
     data:
-      value: >-
-        {{trigger.to_state.name|replace('Motion Sensor','')}}
+      variable: last_motion
+      value: "livingroom"
       attributes:
-        history_1: "{{states('sensor.last_motion')}}"
-        history_2: "{{state_attr('sensor.last_motion','history_1')}}"
-        history_3: "{{state_attr('sensor.last_motion','history_2')}}"
-    target:
-      entity_id: sensor.last_motion
-```
-```yaml
+          history_1: "{{states('variable.last_motion')}}"
+          history_2: "{{state_attr('variable.last_motion','history_1')}}"
+          history_3: "{{state_attr('variable.last_motion','history_2')}}"
+
 action:
-  - service: variable.update_binary_sensor
+  - service: variable.set_entity
     data:
-      value: true
-      replace_attributes: true
-      attributes:
-        country: USA
-    target:
-      entity_id: binary_sensor.test_binary_var
+      entity: sensor.test_counter
+      value: 30
 ```
 
-## Example timer automation
-
-* Create a sensor variable with the Variable ID of `test_timer` and Initial Value of `0`
+### Example timer automation
 
 ```yaml
+variable:
+  test_timer:
+    value: 0
+    attributes:
+      icon: mdi:alarm
+
 script:
   schedule_test_timer:
     sequence:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: test_timer
           value: 30
-        target:
-          entity_id: sensor.test_timer
       - service: automation.turn_on
         data:
           entity_id: automation.test_timer_countdown
@@ -193,16 +144,16 @@ automation:
       - platform: time_pattern
         seconds: '/1'
     action:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: test_timer
           value: >
-            {{ [((states('sensor.test_timer') | int(default=0)) - 1), 0] | max }}
-        target:
-          entity_id: sensor.test_timer
+            {{ [((states('variable.test_timer') | int(default=0)) - 1), 0] | max }}
+
   - alias: test_timer_trigger
     trigger:
       platform: state
-      entity_id: sensor.test_timer
+      entity_id: variable.test_timer
       to: '0'
     action:
       - service: automation.turn_off
@@ -210,10 +161,7 @@ automation:
           entity_id: automation.test_timer_countdown
 ```
 
-<details>
-<summary><h4>Play and Save TTS Messages + Message History - Made by <a href="https://github.com/jazzyisj">jazzyisj</a></h4></summary>
-
-#### https://github.com/jazzyisj/save-tts-messages
+### Play and Save TTS Messages + Message History - Made by https://github.com/jazzyisj
 
 This is more or less an answering machine (remember those?) for your TTS messages. When you play a TTS message that you want saved under certain conditions (ie. nobody is home), you will call the script Play or Save TTS Message script.play_or_save_message instead of calling your tts service (or Alexa notify) directly. The script will decide whether to play the message immediately, or save it based on the conditions you specify. If a saved tts message is repeated another message is not saved, only the timestamp is updated to the most recent instance.
 
@@ -223,7 +171,8 @@ Saved messages will survive restarts.
 
 BONUS - OPTIONAL TTS MESSAGE HISTORY
 
-You can find the full documentation on how to do this and adjust this to your needs in [here](https://github.com/Wibias/hass-variables/tree/master/examples/save-tts-message/tts.md).
-</details>
+You can find the full documentation on how to do this and andjust this to your needs in [here](https://github.com/Wibias/hass-variables/tree/master/examples/save-tts-message/tts.md).
 
-#### More examples can be found in the [examples](https://github.com/Wibias/hass-variables/tree/master/examples) folder.
+---
+
+More examples can be found in the examples folder.
