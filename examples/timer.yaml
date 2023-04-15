@@ -1,13 +1,16 @@
-# Create a sensor variable with the Variable ID of `test_timer` and Initial Value of `0`
+variable:
+  test_timer:
+    value: 0
+    attributes:
+      icon: mdi:alarm
 
 script:
   schedule_test_timer:
     sequence:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: test_timer
           value: 30
-        target:
-          entity_id: sensor.test_timer
       - service: automation.turn_on
         data:
           entity_id: automation.test_timer_countdown
@@ -19,12 +22,11 @@ automation:
       - platform: time_pattern
         seconds: '/1'
     action:
-      - service: variable.update_sensor
+      - service: variable.set_variable
         data:
+          variable: test_timer
           value: >
-            {{ [((states('sensor.test_timer') | int(default=0)) - 1), 0] | max }}
-        target:
-          entity_id: sensor.test_timer
+            {{ [((variable.state | int(default=0)) - 1), 0] | max }}
 
   - alias: test_timer_trigger
     trigger:
